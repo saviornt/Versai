@@ -1,0 +1,13 @@
+/.idea
+/.venv
+/.vs
+/.vscode
+/backlog
+/Content
+/DerivedDataCache
+/docs
+/Intermediate
+/Python
+/Saved
+/__pycache__
+/Plugins/Developer/RiderLink/Intermediate

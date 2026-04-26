@@ -1,0 +1,19 @@
+﻿[project]
+name = "Versai"
+version = "0.1.0"
+requires-python = ">=3.14"
+dependencies = [
+    "torch==2.11.0+cu130",
+    "numpy",
+    "soundcard",
+    "gguf",
+    "psutil",
+    "torchaudio==2.11.0+cu130",
+    "torchvision==0.26.0+cu130"
+]
+
+[tool.rider]
+python.interpreter = ".venv\\Scripts\\python.exe"   # Rider will pick this up
+
+[tool.setuptools]
+packages = ["Versai"]
