@@ -1,3 +1,4 @@
+/.git
 /.idea
 /.venv
 /.vs
@@ -11,3 +12,7 @@
 /Saved
 /__pycache__
 /Plugins/Developer/RiderLink/Intermediate
+/Plugins/GameFeatures/CausalLM/Content
+/Plugins/GameFeatures/CausalLM/Intermediate
+/Plugins/GameFeatures/ExampleGameFeaturePlugin/Content
+/Plugins/GameFeatures/ExampleGameFeaturePlugin/Intermediate

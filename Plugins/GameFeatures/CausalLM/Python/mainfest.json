@@ -1,0 +1,9 @@
+{
+  "name": "CausalLM",
+  "method": "transformers",
+  "type": "decoder",
+  "description": "Standard causal language modeling (next-token prediction) used in GPT-style autoregressive training.",
+  "version": "1.0",
+  "compatible_with": ["base_game"],
+  "tags": ["self_supervised", "autoregressive", "decoder_only"]
+}

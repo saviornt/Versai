@@ -1,16 +1,12 @@
 import torch
-from .config import TrainingConfig
+
+from Versai.settings import settings
 
 
-def get_dummy_batch(config: TrainingConfig, device: str) -> torch.Tensor:
-    """MVP data loader — returns a simple random batch for causal LM.
-    Later this will be replaced by player-uploaded data (text, protein sequences, etc.)
-    with proper tokenization and streaming.
-    """
+def get_dummy_batch():
     return torch.randint(
         0,
-        config.vocab_size,
-        (config.batch_size, config.seq_len),
-        device=device,
-        dtype=torch.long,
+        settings.vocab_size,
+        (settings.batch_size, settings.seq_len),
+        device="cuda" if torch.cuda.is_available() else "cpu",
     )

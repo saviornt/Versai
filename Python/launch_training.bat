@@ -1,15 +1,18 @@
 @echo off
-title Versai Training Core - Live Neural Ambience
-echo ================================================
-echo Versai Training Core Launcher
-echo Python 3.14 + PyTorch 2.11 + RTX 3080 Ready
-echo ================================================
+title Versai Training Core
 
 cd /d "%~dp0"
 
 call .venv\Scripts\activate.bat
 
-echo Starting training core (Self-Supervised Fluency for MVP)...
-python -m Versai.training
+:: Make the main Versai package importable from plugins
+set PYTHONPATH=%CD%\Versai;%PYTHONPATH%
+
+echo ================================================
+echo Versai Training Core Launcher
+echo PYTHONPATH set to include main Versai package
+echo ================================================
+
+python -m Versai.core
 
 pause

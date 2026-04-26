@@ -10,7 +10,10 @@ dependencies = [
     "psutil",
     "torchaudio",
     "torchvision",
-    "numba"
+    "numba",
+    "triton-windows",
+    "pydantic[email]",
+    "pydantic-settings"
 ]
 
 [tool.rider]
