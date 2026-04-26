@@ -476,6 +476,17 @@ FodyWeavers.xsd
 *.sln.iml
 
 ### UnrealEngine template
+/.idea
+/.venv
+/.vs
+/.vscode
+/.idea
+.ignore
+/DerivedDataCache
+/Intermediate
+/Binaries
+/__pycache__
+/Plugins/Developer/RiderLink/
 # Visual Studio 2015 user specific files
 
 # Compiled Object files
