@@ -1,4 +1,4 @@
-# Versai
+# Versai (In Active Development)
 
 **Procedural Vibe / Ambience Training Simulator**
 
