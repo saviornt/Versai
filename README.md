@@ -1,8 +1,8 @@
-# Versai
+# Versai (In Active Development)
 
 **Procedural Vibe / Ambience Training Simulator**
 
-*Train a real large language model **as** the gameplay. Sculpt intelligence inside a living Niagara procedural universe that reacts in real time to loss, attention, gradients, and embeddings. Export polished GGUF models you can actually use.*
+*Train a real AI using Machine Learning **as** the gameplay. Sculpt intelligence inside a living Niagara procedural universe that reacts in real time to loss, attention, gradients, and embeddings. Export polished GGUF models you can actually use.*
 
 ---
 
