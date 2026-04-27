@@ -1,125 +1,114 @@
-﻿import torch
-import torch.nn as nn
-from torch.nn.attention.flex_attention import flex_attention
-import numpy as np
-import multiprocessing.shared_memory as shm
-import time
-import gguf
+﻿import argparse
+import importlib
+import sys
 from pathlib import Path
-import soundcard as sc  # WASAPI exclusive mode later
 
-class VersaiSharedBuffer:
-    """Zero-copy telemetry bridge to UE5 Niagara NDI"""
-    def __init__(self, name: str = "VersaiTelemetry", size_mb: int = 128):
-        self.name = name
-        self.size = size_mb * 1024 * 1024
-        try:
-            self.shm = shm.SharedMemory(name=self.name, create=True, size=self.size)
-        except FileExistsError:
-            self.shm = shm.SharedMemory(name=self.name, create=False)
-        self.buffer = np.ndarray((self.size,), dtype=np.uint8, buffer=self.shm.buf)
-        self.offset = 0  # simple ring-buffer style for MVP
 
-    def write_telemetry(self, loss: float, embeddings: torch.Tensor, attention_scores: torch.Tensor):
-        """Called every training step — broadcasts to UE5"""
-        data = {
-            "loss": np.float32(loss),
-            "embed_norm": embeddings.norm().item(),
-            "attention_max": attention_scores.max().item(),
-            "timestamp": time.time()
-        }
-        # For MVP we serialize simple metrics; later we can memory-map full tensors
-        import pickle
-        payload = pickle.dumps(data)
-        # Simple header + payload (expand later for full tensors)
-        self.buffer[0:4] = np.frombuffer(len(payload).to_bytes(4, 'little'), dtype=np.uint8)
-        self.buffer[4:4+len(payload)] = np.frombuffer(payload, dtype=np.uint8)
-        self.offset = (self.offset + len(payload) + 4) % self.size
+from Versai.settings import settings
+from Versai.shared_memory import VersaiSharedBuffer
 
-    def close(self):
-        self.shm.close()
-        self.shm.unlink()
 
-class AmbienceTransformer(nn.Module):
-    def __init__(self, vocab_size: int = 32000, d_model: int = 512, n_heads: int = 8, n_layers: int = 6):
-        super().__init__()
-        self.embeddings = nn.Embedding(vocab_size, d_model)
-        self.transformer = nn.TransformerEncoder(
-            nn.TransformerEncoderLayer(d_model, n_heads, batch_first=True, norm_first=True),
-            num_layers=n_layers
-        )
+def parse_args():
+    parser = argparse.ArgumentParser(description="Versai Training Core")
+    parser.add_argument(
+        "--plugin",
+        type=str,
+        default=None,
+        help="Game Feature Plugin name (e.g. CausalLM)",
+    )
+    parser.add_argument(
+        "--load-checkpoint",
+        type=str,
+        default=None,
+        help="Path to GGUF checkpoint to continue from",
+    )
+    parser.add_argument(
+        "--branch",
+        type=str,
+        default=None,
+        help="Branch name to use (auto-incremented if main exists and no checkpoint is loaded)",
+    )
+    parser.add_argument(
+        "--max-steps",
+        type=int,
+        default=None,
+        help="Maximum number of training steps (None = unlimited)",
+    )
+    parser.add_argument("--checkpoint-every-steps", type=int, default=200)
+    parser.add_argument("--checkpoint-every-minutes", type=float, default=None)
+    return parser.parse_args()
 
-    def forward(self, x: torch.Tensor, telemetry_buffer: VersaiSharedBuffer):
-        def telemetry_mod(score, b, h, q_idx, kv_idx):
-            # Real-time attention telemetry hook (FlexAttention)
-            telemetry_buffer.write_telemetry(0.0, self.embeddings.weight, score)  # loss updated outside
-            return score
 
-        x = self.embeddings(x)
-        # PyTorch 2.11 FlexAttention with telemetry
-        # (simplified for MVP — full transformer uses it internally)
-        x = flex_attention(x, x, x, score_mod=telemetry_mod) if hasattr(self, 'flex') else x
-        return self.transformer(x)
+def get_next_branch_name(model_name: str) -> str:
+    """Auto-increment branch name if 'main' already exists and we are starting fresh."""
+    base_dir = settings.checkpoint_dir / model_name
+    if not base_dir.exists():
+        return "main"
 
-# 4 Training Styles (your MVP requirement)
-TRAINING_STYLES = {
-    "self_supervised": {"objective": "causal_lm", "viz": "spiral_galaxy"},
-    "adversarial": {"objective": "gan_style", "viz": "competing_galaxies"},
-    "reinforcement": {"objective": "rlhf_lite", "viz": "trajectories"},
-    "custom": {"objective": "meta_q_star", "viz": "procedural_universe"}  # ← your hook
-}
+    if not (base_dir / "main").exists():
+        return "main"
 
-def training_loop(config: dict):
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    print(f"🚀 Versai Training Core starting on {device} — Python 3.14 + PyTorch 2.11")
+    # Find highest branch-N
+    i = 1
+    while (base_dir / f"branch-{i}").exists():
+        i += 1
+    return f"branch-{i}"
 
-    model = AmbienceTransformer().to(device)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4)
 
-    telemetry = VersaiSharedBuffer(name="VersaiTelemetry", size_mb=128)
+def load_plugin_trainer(plugin_name: str):
+    plugin_path = (
+        Path(__file__).parent.parent.parent
+        / "Plugins"
+        / "GameFeatures"
+        / plugin_name
+        / "Python"
+    )
+    if not plugin_path.exists():
+        raise FileNotFoundError(f"Plugin not found: {plugin_path}")
 
-    # Dummy dataset for MVP (replace with player-uploaded data later)
-    batch_size = 32
-    seq_len = 128
-    vocab_size = 32000
+    sys.path.insert(0, str(plugin_path))
+    trainer_module = importlib.import_module(f"{plugin_name}.trainer")
+    return trainer_module.run_training
 
-    style = config.get("style", "self_supervised")
-    print(f"Training in style: {style} → {TRAINING_STYLES[style]['viz']}")
 
-    step = 0
-    while True:  # Run until UE5 tells us to stop via shared memory flag
-        # Simulate batch (real data loader comes next sprint)
-        x = torch.randint(0, vocab_size, (batch_size, seq_len), device=device)
-        target = x[:, 1:]  # causal
+def main():
+    args = parse_args()
 
-        output = model(x, telemetry)
-        loss = nn.CrossEntropyLoss()(output[:, :-1].reshape(-1, vocab_size), target.reshape(-1))
+    plugin_name = args.plugin or settings.active_plugin
+    model_name = settings.model_name
 
-        loss.backward()
-        optimizer.step()
-        optimizer.zero_grad()
+    # Determine branch name
+    if args.load_checkpoint:
+        branch_name = settings.branch_name  # keep current branch when loading
+    elif args.branch:
+        branch_name = args.branch
+    else:
+        branch_name = get_next_branch_name(model_name)
 
-        # Telemetry every step
-        telemetry.write_telemetry(loss.item(), model.embeddings.weight, torch.rand(1))  # placeholder
+    # Update settings for this run
+    settings.branch_name = branch_name
 
-        if step % 10 == 0:
-            print(f"Step {step} | Loss: {loss.item():.4f} | Style: {style}")
+    print("Versai Training Core")
+    print(f"   Plugin: {plugin_name}")
+    print(f"   Model:  {model_name}")
+    print(f"   Branch: {branch_name}")
+    print(f"   Max steps: {args.max_steps if args.max_steps else 'Unlimited'}")
 
-            # GGUF auto-save on stability (MVP threshold)
-            if loss.item() < 2.5 and step > 50:
-                save_to_gguf(model, f"checkpoints/versai_{style}_{step}.gguf", config)
+    run_training = load_plugin_trainer(plugin_name)
 
-        step += 1
-        time.sleep(0.016)  # ~60 FPS training cadence
+    telemetry = VersaiSharedBuffer()
 
-def save_to_gguf(model, path: str, metadata: dict):
-    Path(path).parent.mkdir(parents=True, exist_ok=True)
-    # Real gguf-py writer (stub for MVP)
-    with open(path, "wb") as f:
-        # Full GGUF implementation in next file — this is placeholder
-        f.write(b"GGUF" + b"\0" * 100)  # real code coming
-    print(f"✅ GGUF checkpoint saved: {path}")
+    if args.load_checkpoint:
+        print(f"   Loading checkpoint: {args.load_checkpoint}")
+
+    run_training(
+        telemetry_buffer=telemetry,
+        max_steps=args.max_steps,
+        checkpoint_every_steps=args.checkpoint_every_steps,
+        checkpoint_every_minutes=args.checkpoint_every_minutes,
+        load_checkpoint=args.load_checkpoint,
+    )
+
 
 if __name__ == "__main__":
-    config = {"style": "self_supervised"}  # UE5 HUD will override via shared memory later
-    training_loop(config)
+    main()

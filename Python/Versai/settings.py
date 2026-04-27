@@ -13,15 +13,18 @@ class VersaiSettings(BaseSettings):
         extra="ignore",
     )
 
-    training_style: str = "self_supervised"
+    active_plugin: str = "CausalLM"
+    model_name: str = "causal_lm"
+    branch_name: str = "main"  # will be auto-incremented by core.py if needed
 
-    # Global defaults (can be overridden per-plugin via env vars)
+    # Model architecture
     vocab_size: int = 32000
     d_model: int = 256
     n_heads: int = 8
     n_layers: int = 4
     feedforward_multiplier: int = 4
 
+    # Training hyperparameters
     batch_size: int = 32
     seq_len: int = 128
     lr: float = 0.0001
@@ -32,19 +35,18 @@ class VersaiSettings(BaseSettings):
     norm_first: bool = True
     bias: bool = True
 
-    checkpoint_interval: int = 200
-    save_on_stable_loss: float = 2.5
+    # Training control
+    max_steps: Optional[int] = None
+    checkpoint_every_steps: int = 200
+    checkpoint_every_minutes: Optional[float] = None
 
+    # Shared memory
     telemetry_shm_name: str = "VersaiTelemetry"
     telemetry_size_mb: int = 128
 
     enable_torch_compile: bool = False
 
-    active_plugin: Optional[str] = None
-    plugin_path: Optional[Path] = None
-
     checkpoint_dir: Path = Path(__file__).parent.parent.parent / "Saved" / "Checkpoints"
 
 
-# Global instance
 settings = VersaiSettings()
