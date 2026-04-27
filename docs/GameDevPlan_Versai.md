@@ -1,4 +1,12 @@
-# **Engineering Neural Ambience: A Technical Framework for Real-Time Neural Network Training and Procedural Universe Synthesis**
+# Engineering Neural Ambience: A Technical Framework for Real-Time Neural Network Training and Procedural Universe Synthesis
+
+## ⚠️ HISTORICAL TECHNICAL FRAMEWORK (April 26, 2026)
+
+This document reflects the pre-hybrid vision.  
+Current architecture (v4): Shared Memory → UNiagaraDataInterface → (PCG Graphs + Niagara VFX).
+See Architecture Design Document_v4.md for the live spec.
+
+---
 
 The convergence of high-performance deep learning and real-time interactive environments has catalyzed a new paradigm in software engineering: the development of 'ambience' games that serve as functional, visual, and auditory interfaces for live neural network training. Unlike traditional simulations where artificial intelligence is a secondary component for non-player character behavior, the proposed project positions the training of a large-scale neural model as the primary mechanical engine of the experience. This report details the architectural requirements, implementation strategies, and theoretical foundations for constructing such a system on a Windows 11 Pro workstation powered by an NVIDIA RTX 3080, utilizing the bleeding-edge software stack of Python 3.14 and PyTorch 2.11.
 

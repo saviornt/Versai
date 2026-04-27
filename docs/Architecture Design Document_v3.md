@@ -1,4 +1,4 @@
-# 📘 Architecture Design Document v3
+# 📘 Architecture Design Document v4
 
 ## UE5 Neural Training Visualization System (Single-Player GPU-Shared Memory Architecture)
 
@@ -31,35 +31,27 @@ This system IS:
 
 # 3. High-Level Architecture
 
-```text id="v3_arch_01"
-┌──────────────────────────────┐
-│        Python Backend         │
-│  - Training Loop (PyTorch)   │
-│  - State Reduction Layer     │
-│  - Shared Memory Writer      │
-└──────────────┬───────────────┘
-               │
-     Shared Memory (CPU/GPU)
-               │
-┌──────────────▼───────────────┐
-│      Memory Layout Layer      │
-│  - Structs (C/C++ compatible) │
-│  - Double Buffering           │
-│  - Frame Sync Index           │
-└──────────────┬───────────────┘
-               │
-┌──────────────▼───────────────┐
-│        Unreal Engine 5        │
-│  - C++ Shared Memory Reader   │
-│  - Game Thread Sync           │
-│  - Visualization Layer        │
-└──────────────┬───────────────┘
-               │
-     ┌─────────▼─────────┐
-     │     Niagara       │
-     │ UNiagaraDataInterface │
-     │ GPU Particle / Graph │
-     └──────────────────────┘
+```mermaid
+flowchart TB
+    A["Multimodal Datasets"]
+    B["<u>Python Backend</u><br/>- Training Loop (PyTorch)<br/>- State Reduction Layer<br/>- Shared Memory Writer<br/>- GPU Friendly Structs"]
+    C["Shared Memory (CPU/GPU)"]
+    D["<u>Memory Layout Layer</u><br/>- Structs (C/C++ compatible)<br/>- Double Buffering<br/>- Frame Sync Index"]
+    E["<u>Unreal Engine 5</u><br/>- C++ Shared Memory Reader<br/>- Game Thread Sync"]
+    F["UNiagaraDataInterface"]
+    G["<u>Niagara</u><br/>Visual Effects"]
+    H["<u>PCG (Procedural Content Generation)</u><br/>Environment Design"]
+    I["<u>MetaSounds</u><br/>Ambient Soundscape"]
+
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    E --> F
+
+    F --> G
+    F --> H
+    F --> I
 ```
 
 ---
@@ -132,6 +124,12 @@ struct LayerFrame {
     int neuron_count;
     int connection_count;
 };
+
+struct VisGenPCG {
+    vector<float> position;
+    float density;
+    float gradiant_mag;
+}
 ```
 
 ---
@@ -223,8 +221,10 @@ while training:
 
 * SharedMemoryReader (C++)
 * FrameSyncManager
-* Visualization Controller
 * Niagara System (UNiagaraDataInterface)
+* Niagara Particle Effects System
+* Procedural Content Generation (PCG)
+* MetaSounds
 
 ---
 
@@ -245,7 +245,7 @@ void Tick(float DeltaTime)
 
 ---
 
-# 9. Niagara Integration (UNiagaraDataInterface)
+# 9. Hybrid PCG + Niagara Integration using UNiagaraDataInterface
 
 This is where your system becomes visually powerful.
 
@@ -276,12 +276,12 @@ directly into GPU particles.
 
 ## 9.3 Ideal mapping
 
-| ML concept | Niagara representation |
-| ---------- | ---------------------- |
-| Neuron     | particle               |
-| Activation | color/brightness       |
-| Weight     | line thickness         |
-| Layer      | emitter system         |
+| ML concept | PCG Representation         | Niagara representation |
+| ---------- | ---------------------------|----------------------- |
+| Neuron     | PCG Point + attributes     | particle               |
+| Activation | Density / Scale Attribute  | color/brightness       |
+| Weight     | Spline Thickness / tension | line thickness         |
+| Layer      | PCG Volume / Layer Group   | emitter system         |
 
 ---
 
@@ -401,10 +401,11 @@ Since you're still in scaffolding stage:
 
 ### Phase 3
 
-* Niagara integration (simple particles)
+* UNiagaraDataInterface integration
+* Connect to Niagara, PCG, SoundScape
 
 ### Phase 4
 
-* Full neural visualization mapping
+* Full neural visualization mapping and testing
 
 ---

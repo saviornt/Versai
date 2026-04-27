@@ -1,32 +1,32 @@
-**Versai Post-MVP Feature Plugin System: Models as DLC**  
-**Design Document**  
-**Version:** 1.0 (April 26, 2026)  
-**Project Name:** Versai – Procedural Vibe / Ambience Training Simulator  
-**Author:** Grok (Lead Dev) + Dave (Human-in-the-Loop)  
-**Status:** Post-MVP / DLC Expansion Phase  
+# Versai Post-MVP Feature Plugin System: Models as DLC
+
+**Design Document**
+**Version:** 1.0 (April 26, 2026)
+**Project Name:** Versai – Procedural Vibe / Ambience Training Simulator
+**Author:** Grok (Lead Dev) + Dave (Human-in-the-Loop)
+**Status:** Post-MVP / DLC Expansion Phase
 **File Location:** `Versai/Sources/Design/Plugins/Models_DLC.md` (living document)
 
----
+## 1. Vision & High-Level Pitch
 
-### 1. Vision & High-Level Pitch
 **Versai Models as DLC turns every trained universe into a shareable, installable “Game Feature Plugin”** — a complete, self-contained package that players can download, drop into their game, and instantly load as a new living intelligence with its own visual/auditory ambience, training style, and inference personality.
 
 **Core Fantasy:**  
 Players don’t just *train* models — they **collect, trade, and evolve entire universes**. A Model DLC is like a trading card, a musical instrument, and a living AI companion all in one. The community becomes co-creators of intelligence.
 
 **Player Experience Goals:**
+
 - Instant gratification: drop a `.versaiplugin` folder → new universe appears in the menu
 - Creative expression: package your best custom-trained model + ambience preset
 - Social / marketplace layer: share on Steam Workshop, itch.io, or in-game gallery
 - Deep ownership: each model carries its training history, metadata, and “ambience signature”
 - Post-launch monetization & community longevity (free core + premium DLC packs)
 
-**One-Sentence Logline:**  
+**One-Sentence Logline:**
+
 “Every GGUF model you sculpt in Versai can become a beautiful, plug-and-play DLC that brings its own procedural universe, sonification, and training style into any player’s game.”
 
----
-
-### 2. Core Features of a Model DLC Plugin
+## 2. Core Features of a Model DLC Plugin
 
 | Feature | Description | MVP for Plugin System |
 |---------|-------------|-----------------------|
@@ -39,23 +39,25 @@ Players don’t just *train* models — they **collect, trade, and evolve entire
 | **Hot-Swap Support** | Load/unload at runtime without restarting training | Must-have |
 | **Versioning & Compatibility** | Manifest enforces engine version + PyTorch compat | Must-have |
 
----
+## 3. Plugin Package Specification (Folder Structure)
 
-### 3. Plugin Package Specification (Folder Structure)
-
-```
-VersaiPlugins/
-└── MyCosmicOracle-v1.2/                  ← Plugin folder name (unique ID)
-    ├── manifest.json                     ← Required metadata
-    ├── model.gguf                        ← Core weights (can be multiple for MoE later)
-    ├── training_style.py                 ← Optional custom training algorithm
-    ├── inference_config.json             ← Generation & personality settings
-    ├── ambience_preset/                  ← Visual + audio identity
-    │   ├── niagara_system.uasset         ← UE5 Niagara asset (or .niagara file)
-    │   ├── sonification_map.json         ← Hierarchical mapping for this model
-    │   └── preview_thumbnail.png
-    ├── lore.md                           ← Optional flavor text / story
-    └── icon.png                          ← Menu icon
+```text
+Versai/Plugins/
+└── CausalLM-{32bit_hash}/                    ← Plugin folder name (unique ID)
+    ├── Python/                               ← Python Model Scripts
+        ├── manifest.json                     ← Required metadata
+        ├── model.gguf                        ← Core weights (can be multiple for MoE later)
+        ├── trainer.py                        ← Training algorithm
+        ├── config.json                       ← Generation & personality settings
+        ├── README.md                         ← Model documentation
+    ├── Content/                              ← UE5 Content Folder
+        ├── ambience_preset/                  ← Visual + audio identity presets
+        │   ├── niagara_system.uasset         ← UE5 Niagara asset (or .niagara file)
+        │   ├── pcg_graph.uasset              ← UE5 PCG asset
+        │   ├── sonification_map.json         ← Hierarchical mapping for this model
+        │   └── preview_thumbnail.png
+        ├── lore.md                           ← Optional flavor text / story
+        └── icon.png                          ← Menu icon
 ```
 
 **manifest.json example:**
@@ -70,6 +72,7 @@ VersaiPlugins/
   "style": "custom_meditation",
   "d_model": 512,
   "gguf_filename": "model.gguf",
+  "pcg_graph": "cosmic_nebula",
   "ambience_preset": "cosmic_nebula",
   "tags": ["meditative", "wisdom", "space", "ambient"],
   "created": "2026-04-26",
@@ -77,11 +80,14 @@ VersaiPlugins/
 }
 ```
 
+> Note: The above manifest needs to be updated/merged with the actual sample model's manifest.json for accuracy.
+
 ---
 
 ### 4. Integration with Core Versai Game
 
 **In-Game Flow:**
+
 1. **Plugin Browser** (main menu or in-universe “Observatory”) — scans `VersaiPlugins/` and `Saved/Plugins/`
 2. **One-click Install** — copies folder + registers in SaveGame
 3. **Hot-Swap** — from the HUD, player can switch active model mid-training or in inference mode
@@ -89,6 +95,7 @@ VersaiPlugins/
 5. **Ambience Sync** — Niagara Data Interface + sonification engine automatically load the plugin’s preset when the model is active
 
 **SaveGame Integration:**
+
 - UE5 `UVersaiSaveGame` stores an array of installed plugin IDs + active model reference
 - Metadata (loss history, favorite interventions) is saved per plugin
 
