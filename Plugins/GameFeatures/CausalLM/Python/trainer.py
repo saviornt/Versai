@@ -11,12 +11,12 @@ project_root = plugin_dir.parent.parent.parent.parent
 sys.path.insert(0, str(plugin_dir))
 sys.path.insert(0, str(project_root / "Python"))
 
-from config import CausalLMConfig # noqa E402
+from config import CausalLMConfig  # noqa E402
 from model import CausalLMModel  # noqa E402
 
 from Versai.structured_buffer import VersaiStructuredBuffer  # pyright: ignore[reportMissingImports] # noqa E402
 from Versai.gguf_fileops import save_to_gguf, load_from_gguf  # pyright: ignore[reportMissingImports] # noqa E402
-from Versai.data.dataloader import get_dataloader  # pyright: ignore[reportMissingImports] # noqa E402
+from Versai.data.data_loader import get_dataloader  # pyright: ignore[reportMissingImports] # noqa E402
 
 
 def run_training(
@@ -39,9 +39,7 @@ def run_training(
         case _:
             device = "cpu"
 
-    
     device = "cuda" if torch.cuda.is_available() else "cpu"
-
 
     print(f"CausalLM Training Started on {device}")
 

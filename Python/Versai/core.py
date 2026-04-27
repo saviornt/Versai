@@ -59,6 +59,10 @@ def get_next_branch_name(model_name: str) -> str:
 
 def load_plugin_trainer(plugin_name: str):
     """Dynamically load the trainer from a Game Feature Plugin."""
+    versai_root = Path(__file__).parent.parent.parent
+    if str(versai_root) not in sys.path:
+        sys.path.insert(0, str(versai_root))
+
     plugin_path = (
         Path(__file__).parent.parent.parent
         / "Plugins"
@@ -69,7 +73,8 @@ def load_plugin_trainer(plugin_name: str):
     if not plugin_path.exists():
         raise FileNotFoundError(f"Plugin not found: {plugin_path}")
 
-    sys.path.insert(0, str(plugin_path))
+    if str(plugin_path) not in sys.path:
+        sys.path.insert(0, str(plugin_path))
 
     # Flat import — trainer.py is in the Python/ folder itself
     trainer_module = importlib.import_module("trainer")

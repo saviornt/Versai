@@ -24,7 +24,12 @@
 		{
 			"Name": "WebBrowserWidget",
 			"Enabled": true
-		}
+		},
+		{
+			"Name": "GitSourceControl",
+			"Enabled": true,
+			"Comment": "Enables the Git provider in the Source Control login dialog."
+		},
 		{
 			"Name": "EditorScriptingUtilities",
 			"Enabled": true,
