@@ -3,7 +3,6 @@ import importlib
 import sys
 from pathlib import Path
 
-
 from Versai.settings import settings
 from Versai.shared_memory import VersaiSharedBuffer
 
@@ -22,12 +21,7 @@ def parse_args():
         default=None,
         help="Path to GGUF checkpoint to continue from",
     )
-    parser.add_argument(
-        "--branch",
-        type=str,
-        default=None,
-        help="Branch name to use (auto-incremented if main exists and no checkpoint is loaded)",
-    )
+    parser.add_argument("--branch", type=str, default=None, help="Branch name to use")
     parser.add_argument(
         "--max-steps",
         type=int,
@@ -40,15 +34,11 @@ def parse_args():
 
 
 def get_next_branch_name(model_name: str) -> str:
-    """Auto-increment branch name if 'main' already exists and we are starting fresh."""
+    """Auto-increment branch name if main already exists and we are starting fresh."""
     base_dir = settings.checkpoint_dir / model_name
-    if not base_dir.exists():
+    if not base_dir.exists() or not (base_dir / "main").exists():
         return "main"
 
-    if not (base_dir / "main").exists():
-        return "main"
-
-    # Find highest branch-N
     i = 1
     while (base_dir / f"branch-{i}").exists():
         i += 1
@@ -56,6 +46,7 @@ def get_next_branch_name(model_name: str) -> str:
 
 
 def load_plugin_trainer(plugin_name: str):
+    """Dynamically load the trainer from a Game Feature Plugin."""
     plugin_path = (
         Path(__file__).parent.parent.parent
         / "Plugins"
@@ -77,15 +68,14 @@ def main():
     plugin_name = args.plugin or settings.active_plugin
     model_name = settings.model_name
 
-    # Determine branch name
+    # Determine branch name once per run
     if args.load_checkpoint:
-        branch_name = settings.branch_name  # keep current branch when loading
+        branch_name = settings.branch_name
     elif args.branch:
         branch_name = args.branch
     else:
         branch_name = get_next_branch_name(model_name)
 
-    # Update settings for this run
     settings.branch_name = branch_name
 
     print("Versai Training Core")
@@ -93,13 +83,12 @@ def main():
     print(f"   Model:  {model_name}")
     print(f"   Branch: {branch_name}")
     print(f"   Max steps: {args.max_steps if args.max_steps else 'Unlimited'}")
+    if args.load_checkpoint:
+        print(f"   Loading checkpoint: {args.load_checkpoint}")
 
     run_training = load_plugin_trainer(plugin_name)
 
     telemetry = VersaiSharedBuffer()
-
-    if args.load_checkpoint:
-        print(f"   Loading checkpoint: {args.load_checkpoint}")
 
     run_training(
         telemetry_buffer=telemetry,

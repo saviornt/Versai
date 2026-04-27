@@ -13,9 +13,16 @@ class VersaiSettings(BaseSettings):
         extra="ignore",
     )
 
+    # Plugin / Model / Branch selection
     active_plugin: str = "CausalLM"
     model_name: str = "causal_lm"
     branch_name: str = "main"  # will be auto-incremented by core.py if needed
+
+    # Data loading
+    data_source: str = (
+        "dummy"  # "dummy", "text", "protein", "sensor", "multimodal", etc.
+    )
+    data_path: Optional[Path] = None  # Path to dataset file/folder (set via env or arg)
 
     # Model architecture
     vocab_size: int = 32000

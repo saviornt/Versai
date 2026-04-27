@@ -11,12 +11,12 @@ project_root = plugin_dir.parent.parent.parent.parent
 sys.path.insert(0, str(plugin_dir))
 sys.path.insert(0, str(project_root / "Python"))
 
-from config import CausalLMConfig  # noqa: E402
-from model import CausalLMModel  # noqa: E402
+from config import CausalLMConfig # noqa E402
+from model import CausalLMModel  # noqa E402
 
-from Versai.shared_memory import VersaiSharedBuffer  # pyright: ignore[reportMissingImports] # noqa: E402
-from Versai.gguf_fileops import save_to_gguf, load_from_gguf  # pyright: ignore[reportMissingImports] # noqa: E402
-from Versai.data_loader import get_dummy_batch  # pyright: ignore[reportMissingImports] # noqa: E402
+from Versai.shared_memory import VersaiSharedBuffer  # pyright: ignore[reportMissingImports] # noqa E402
+from Versai.gguf_fileops import save_to_gguf, load_from_gguf  # pyright: ignore[reportMissingImports] # noqa E402
+from Versai.data.dataloader import get_dataloader  # pyright: ignore[reportMissingImports] # noqa E402
 
 
 def run_training(
@@ -30,7 +30,19 @@ def run_training(
     if config is None:
         config = CausalLMConfig()
 
+    # match case for cuda, amd, or mps (macos/metal)
+    match True:
+        case _ if torch.cuda.is_available():
+            device = "cuda"
+        case _ if torch.backends.mps.is_available():
+            device = "mps"
+        case _:
+            device = "cpu"
+
+    
     device = "cuda" if torch.cuda.is_available() else "cpu"
+
+
     print(f"CausalLM Training Started on {device}")
 
     model = CausalLMModel(config).to(device)
@@ -42,9 +54,13 @@ def run_training(
         start_step = metadata.get("versai.step", 0)
         print(f"Continued training from step {start_step}")
 
-    optimizer = torch.optim.AdamW(model.parameters(), lr=0.0001)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=config.learning_rate)
 
     telemetry = telemetry_buffer or VersaiSharedBuffer()
+
+    # Get the dataset to train on
+    dataloader = get_dataloader(batch_size=config.batch_size)
+    dataloader_iter = iter(dataloader)
 
     step = start_step
     start_time = time.time()
@@ -56,7 +72,22 @@ def run_training(
                 print(f"Reached max_steps ({max_steps}). Stopping training.")
                 break
 
-            x = get_dummy_batch()
+            try:
+                batch = next(dataloader_iter)
+            except StopIteration:
+                dataloader_iter = iter(dataloader)
+                batch = next(dataloader_iter)
+
+            x = (
+                batch["text"].to(device)
+                if isinstance(batch["text"], torch.Tensor)
+                else torch.randint(
+                    0,
+                    config.vocab_size,
+                    (config.batch_size, config.seq_length),
+                    device=device,
+                )
+            )
             target = x[:, 1:]
 
             output = model(x, telemetry)
