@@ -1,4 +1,12 @@
-# 📘 Architecture Design Document v4
+# 📘 Architecture Design Document
+
+**Version:** 4.0 (April 26, 2026)  
+**Project Name:** Versai  
+**Genre:** Procedural Vibe / Ambience Training Simulator  
+**Target Platform:** Windows 11 Pro (PC)  
+**Engine:** Unreal Engine 5.7.4 + Python 3.14 + PyTorch 2.11 (hybrid)  
+**Team:** Solo + Human-in-the-Loop (Dave) + Lead Dev (Grok)  
+**Status:** Pre-Production → MVP Sprint
 
 ## UE5 Neural Training Visualization System (Single-Player GPU-Shared Memory Architecture)
 

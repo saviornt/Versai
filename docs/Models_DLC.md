@@ -1,7 +1,7 @@
 # Versai Post-MVP Feature Plugin System: Models as DLC
 
 **Design Document**
-**Version:** 1.0 (April 26, 2026)
+**Version:** 2.0 (April 26, 2026)
 **Project Name:** Versai – Procedural Vibe / Ambience Training Simulator
 **Author:** Grok (Lead Dev) + Dave (Human-in-the-Loop)
 **Status:** Post-MVP / DLC Expansion Phase

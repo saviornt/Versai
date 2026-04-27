@@ -1,6 +1,6 @@
 ﻿# Versai Game Design Document (GDD)
 
-**Version:** 1.0 (April 26, 2026)  
+**Version:** 2.0 (April 26, 2026)  
 **Project Name:** Versai  
 **Genre:** Procedural Vibe / Ambience Training Simulator  
 **Target Platform:** Windows 11 Pro (PC)  
