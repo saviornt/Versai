@@ -1,6 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Annotated
+from pydantic import Field
 
 
 class VersaiSettings(BaseSettings):
@@ -47,9 +48,12 @@ class VersaiSettings(BaseSettings):
     checkpoint_every_steps: int = 200
     checkpoint_every_minutes: Optional[float] = None
 
-    # Shared memory
-    telemetry_shm_name: str = "VersaiTelemetry"
-    telemetry_size_mb: int = 128
+    # Shared memory (v2 structured buffer - replaces pickle)
+    telemetry_shm_name: str = "versai_telemetry_shm"
+    telemetry_size_mb: Annotated[int, Field(ge=64, le=1024)] = 512
+    max_neurons: Annotated[int, Field(ge=1024, le=100_000)] = 50_000
+    max_connections: Annotated[int, Field(ge=0, le=500_000)] = 250_000
+    double_buffer: bool = True
 
     enable_torch_compile: bool = False
 

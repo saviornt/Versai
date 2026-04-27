@@ -2,18 +2,30 @@
 import importlib
 import sys
 from pathlib import Path
+from typing import Literal
 
 from Versai.settings import settings
-from Versai.shared_memory import VersaiSharedBuffer
+from Versai.structured_buffer import VersaiStructuredBuffer
 
 
 def parse_args():
+    """Parse command-line arguments for Versai Training Core.
+
+    Supports the exact command you ran: --plugin CausalLM --mode train
+    """
     parser = argparse.ArgumentParser(description="Versai Training Core")
     parser.add_argument(
         "--plugin",
         type=str,
         default=None,
         help="Game Feature Plugin name (e.g. CausalLM)",
+    )
+    parser.add_argument(
+        "--mode",
+        type=str,
+        default="train",
+        choices=["train", "inference"],
+        help="Operation mode (train or inference)",
     )
     parser.add_argument(
         "--load-checkpoint",
@@ -58,7 +70,9 @@ def load_plugin_trainer(plugin_name: str):
         raise FileNotFoundError(f"Plugin not found: {plugin_path}")
 
     sys.path.insert(0, str(plugin_path))
-    trainer_module = importlib.import_module(f"{plugin_name}.trainer")
+
+    # Flat import — trainer.py is in the Python/ folder itself
+    trainer_module = importlib.import_module("trainer")
     return trainer_module.run_training
 
 
@@ -80,6 +94,7 @@ def main():
 
     print("Versai Training Core")
     print(f"   Plugin: {plugin_name}")
+    print(f"   Mode:   {args.mode}")
     print(f"   Model:  {model_name}")
     print(f"   Branch: {branch_name}")
     print(f"   Max steps: {args.max_steps if args.max_steps else 'Unlimited'}")
@@ -88,15 +103,23 @@ def main():
 
     run_training = load_plugin_trainer(plugin_name)
 
-    telemetry = VersaiSharedBuffer()
+    telemetry = VersaiStructuredBuffer()
 
-    run_training(
-        telemetry_buffer=telemetry,
-        max_steps=args.max_steps,
-        checkpoint_every_steps=args.checkpoint_every_steps,
-        checkpoint_every_minutes=args.checkpoint_every_minutes,
-        load_checkpoint=args.load_checkpoint,
-    )
+    # Future-proof mode handling (match/case per coding rules)
+    match args.mode:
+        case "train":
+            run_training(
+                telemetry_buffer=telemetry,
+                max_steps=args.max_steps,
+                checkpoint_every_steps=args.checkpoint_every_steps,
+                checkpoint_every_minutes=args.checkpoint_every_minutes,
+                load_checkpoint=args.load_checkpoint,
+            )
+        case "inference":
+            print("Inference mode not yet implemented - coming in Phase 3")
+            # run_inference(...)  # TODO
+        case _:
+            raise ValueError(f"Unsupported mode: {args.mode}")
 
 
 if __name__ == "__main__":

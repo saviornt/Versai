@@ -14,13 +14,13 @@ sys.path.insert(0, str(project_root / "Python"))
 from config import CausalLMConfig # noqa E402
 from model import CausalLMModel  # noqa E402
 
-from Versai.shared_memory import VersaiSharedBuffer  # pyright: ignore[reportMissingImports] # noqa E402
+from Versai.structured_buffer import VersaiStructuredBuffer  # pyright: ignore[reportMissingImports] # noqa E402
 from Versai.gguf_fileops import save_to_gguf, load_from_gguf  # pyright: ignore[reportMissingImports] # noqa E402
 from Versai.data.dataloader import get_dataloader  # pyright: ignore[reportMissingImports] # noqa E402
 
 
 def run_training(
-    telemetry_buffer: Optional[VersaiSharedBuffer] = None,
+    telemetry_buffer: Optional[VersaiStructuredBuffer] = None,
     config: Optional[CausalLMConfig] = None,
     max_steps: Optional[int] = None,
     checkpoint_every_steps: int = 200,
@@ -56,7 +56,7 @@ def run_training(
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=config.learning_rate)
 
-    telemetry = telemetry_buffer or VersaiSharedBuffer()
+    telemetry = telemetry_buffer or VersaiStructuredBuffer()
 
     # Get the dataset to train on
     dataloader = get_dataloader(batch_size=config.batch_size)

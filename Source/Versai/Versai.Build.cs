@@ -8,7 +8,11 @@ public class Versai : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
+		PublicDependencyModuleNames.AddRange(new string[] {
+			"Core","CoreUObject", "Engine", "InputCore",
+			"EnhancedInput", "CommonUI", "Niagara", "MetasoundFrontend",
+			"AudioModulation", "CausalLM"
+			});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
