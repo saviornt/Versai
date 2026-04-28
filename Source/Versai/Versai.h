@@ -4,3 +4,12 @@
 
 #include "CoreMinimal.h"
 
+/**
+ * 
+ */
+class VERSAI_API Versai
+{
+public:
+	Versai();
+	~Versai();
+};

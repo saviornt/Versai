@@ -1,126 +1,108 @@
-﻿# Python Playground API
+# Python Playground API
 
-**Versai â€“ Procedural Vibe Training Simulator**  
-**Document Version:** 1.0 (April 27, 2026)  
-**Status:** Active â€“ Single source of truth for the Python backend  
+**Versai - Procedural Vibe Training Simulator**  
+**Document Version:** 1.1 (April 28, 2026)  
+**Status:** Active - Source of truth for the Python backend  
 **File Location:** `docs/Python_Playground_API.md`  
-**References:** `Python/Versai/core.py`, `settings.py`, `shared_memory.py`, `gguf_fileops.py`, `SharedMemory_StructuredBuffer_Design.md`, Architecture Design Document v3
+**References:** `Python/Versai/core.py`, `Python/Versai/structured_buffer.py`, `Python/Versai/gguf_fileops.py`, `Plugins/GameFeatures/CausalLM/Python/manifest.json`, `docs/SharedMemory_StructuredBuffer_Design.md`, `docs/NDI-Based Design.md`
 
 ---
 
-## 1. Current Direction (Live Implementation)
+## 1. Current Direction
 
-The Playground is the **Python/Versai** package that owns:
+The Playground is the `Python/Versai` package that owns:
 
-* Training loop (PyTorch 2.11 transformer + FlexAttention telemetry)
-* Data loading / reduction layer
-* GGUF checkpointing
-* Shared-memory bridge to UE5 (NiagaraDataInterface â†’ PCG + Niagara hybrid)
+- training orchestration
+- data loading and reduction
+- GGUF checkpointing
+- structured shared-memory writes for The Verse runtime
 
-**Core entry point:** `core.py`
+The active shipped trainer is provided by the `CausalLM` Game Feature Plugin.
+
+---
+
+## 2. Plugin Configuration Ownership
+
+`Plugins/GameFeatures/CausalLM/Python/manifest.json` is the authoritative source of truth for plugin-owned backend state.
+
+It owns:
+
+- game metadata
+- GGUF export metadata defaults
+- training metadata and defaults
+
+The backend resolves the manifest once at training or plugin initialization. The resolved snapshot stays immutable for the lifetime of that run.
+
+Player edits to `manifest.json` are valid, but they apply on the next training start or plugin reload, not during an active run.
+
+CLI arguments remain valid for run-scoped controls only:
+
+- mode
+- max steps
+- checkpoint cadence
+- explicit checkpoint path
+
+---
+
+## 3. Live Implementation Shape
+
+Current entry flow:
 
 ```python
-# Python/Versai/core.py (live)
 def main():
-    # ... argparse + branch logic
-    run_training = load_plugin_trainer(plugin_name)  # dynamic import from Plugins/GameFeatures/<plugin>/Python/<plugin>.trainer
-    telemetry = VersaiSharedBuffer()                 # current pickle-based buffer
+    run_training = load_plugin_trainer(plugin_name)
+    telemetry = VersaiStructuredBuffer()
     run_training(telemetry_buffer=telemetry, ...)
 ```
 
-**Key characteristics (as of commit 53e9f0d)**:
+Current characteristics:
 
-* Plugin-driven modularity via `importlib` + `sys.path` injection (Game Feature Plugins provide the actual `trainer` module).
-* Settings fully driven by `VERSAI_` environment variables (Pydantic v2).
-* Basic scalar telemetry via `VersaiSharedBuffer` (circular `uint8` + `pickle`).
-* GGUF auto-save via `gguf_fileops.py`.
-* GIL-locked Python 3.14 safe (training runs in separate process).
+- plugin-driven trainer loading via `importlib`
+- manifest-backed `CausalLM` config resolution
+- structured shared-memory telemetry via `VersaiStructuredBuffer`
+- GGUF export via `gguf_fileops.py`
 
-**Strengths**: Already supports modular trainer loading and branch management.  
-**Limitations**: Legacy shared-memory (pickle + single buffer) blocks full PCG/Niagara performance.
+Current limitation:
 
----
-
-## 2. MVP (Next Sprint â€“ Phase 1)
-
-**Goal**: Make the Playground production-ready for the hybrid NDI -> The Verse architecture while preserving a clean path to post-MVP plugin expansion.
-
-**Required deliverables**:
-
-1. **Add `VersaiStructuredBuffer`** (see `SharedMemory_StructuredBuffer_Design.md`).
-2. **Create `core/schemas.py`** with Pydantic models + NumPy structured dtypes.
-3. **Implement data-reduction layer** in each pluginâ€™s `trainer.py`:
-
-   ```python
-   def reduce_model_state(model, step: int) -> LayerFrame:
-       """Transform raw tensors â†’ GPU-friendly PCG structs (zero allocation)."""
-       # ... feature extraction
-       return LayerFrame(...)  # Pydantic model
-   ```
-
-4. **Update `core.py` training orchestration**:
-
-   ```python
-   # New in main()
-   structured_buffer = VersaiStructuredBuffer()
-   run_training(telemetry_buffer=structured_buffer, ...)  # pass structured buffer
-   ```
-
-5. **Keep `VersaiSharedBuffer` side-by-side** for scalar fallback during transition.
-6. **Expose clean API** for plugins (no direct shared-memory knowledge).
-
-**MVP success criteria**:
-
-* Training loop writes reduced `LayerFrame` to double-buffered structured memory.
-* UE5 NDI can read latest frame and feed PCG + Niagara with zero-copy.
-* All code follows: Pydantic v2, Google-style docstrings, async-first where possible, strict typing, no emojis.
+- the shared-memory contract still needs hardening so the UE reader and Python writer agree on exact buffer semantics and layout
 
 ---
 
-## 3. Optimization (Post-MVP â€“ Phase 2)
+## 4. GGUF Metadata Policy
 
-Focus on **performance gains** when paired with UE5 shared-memory + RTX 3080 (or older hardware) and GIL-locked Python 3.14:
+GGUF exports should include:
 
-| Area                        | Current | Optimized Target                              | Expected Gain |
-|-----------------------------|---------|-----------------------------------------------|---------------|
-| Shared-memory write         | pickle + circular | Structured NumPy views + double buffering    | < 0.8 ms/frame |
-| Reduction layer             | ad-hoc     | Vectorized NumPy + pre-allocated arrays       | 3-5Ã— faster |
-| Training process isolation  | basic      | Dedicated `multiprocessing.Process` + sub-interpreter | No GIL contention for audio/NDI |
-| Data transfer to UE5        | scalar only| Zero-copy reinterpret in C++ NDI              | < 0.4 ms read |
-| Hot-reload / plugin swap    | full restart | Live plugin re-import + buffer recreation only| Instant style switch |
+- model identity
+- plugin identity
+- default Verse identity
+- default audio theme identity
+- training style identity
+- manifest-backed training metadata needed for continuation or inspection
 
-**Techniques to apply**:
-
-* Use `np.ndarray(..., buffer=shm.buf, dtype=NEURON_DTYPE)` everywhere.
-* `asyncio` + threading for non-blocking reduction (Python 3.14 free-threaded prep).
-* Cache-aligned structs (`alignas(64)`) on C++ side.
-* Minimal per-frame data (only changed neurons/connections via diffing).
-* Torch `compile` + FlexAttention `score_mod` telemetry hooks (already in settings).
-
-**Target**: 60 FPS UE5 frame rate with training loop at full speed on RTX 3080-class hardware.
+Manifest-backed metadata should be exported under explicit `versai.*` keys.
 
 ---
 
-## 4. Future Enhancements (Phase 3+ / Post-MVP)
+## 5. MVP Backend Rules
 
-* **Python 3.15 migration** â€“ Leverage improved allocator + JIT for 15-25 % overall speedup.
-* **Full free-threaded build** â€“ Remove GIL entirely for audio + sonification sub-interpreters.
-* **Plugin hot-reload without restart** â€“ `importlib.reload` + buffer state migration.
-* **Multi-model / universe merging** â€“ Shared buffer supports multiple `LayerFrame` streams.
-* **Deterministic replay mode** â€“ Record shared-memory snapshots for training playback.
-* **Bio-reactive inputs** â€“ Real-time sensor streams injected into reduction layer.
-* **GGUF + Ambience Metadata embedding** â€“ Extend `gguf_fileops.py` to store PCG/Niagara presets.
-* **Distributed Playground (stretch)** â€“ Optional Ray / Dask for larger models while keeping single-player local mode.
-
-**All enhancements will maintain**:
-
-* Backward compatibility with existing plugins.
-* Zero dynamic allocation in hot path.
-* Strict adherence to Pydantic v2 settings pattern (`VERSAI_*` â†’ `settings.*`).
+- Do not treat environment variables as the source of truth for plugin-owned metadata.
+- Use `manifest.json` for plugin-owned metadata and defaults.
+- Keep core runtime settings under `VERSAI_*` where they are application-level rather than plugin-level.
+- Keep one authoritative telemetry write per training step.
+- Keep shared-memory payloads allocation-aware and zero-copy compatible.
 
 ---
 
-**This document is a living blueprint.**  
-It will be updated at the end of every sprint. All tasks above are written as ready-to-drop Kanban cards.
+## 6. Near-Term Work
 
+Phase 2 and Phase 3 backend work should focus on:
 
+- exact writer/reader binary contract alignment
+- manifest-backed GGUF metadata export
+- stronger scalar telemetry for HUD and MetaSounds
+- real dataset tokenization and collation
+- deterministic restart behavior for shared memory
+
+---
+
+This document is a living blueprint and should be updated with any backend behavior change that affects runtime configuration, telemetry, or checkpoint semantics.

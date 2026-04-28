@@ -11,12 +11,13 @@ project_root = plugin_dir.parent.parent.parent.parent
 sys.path.insert(0, str(plugin_dir))
 sys.path.insert(0, str(project_root / "Python"))
 
-from config import CausalLMConfig  # noqa E402
+from config import CausalLMConfig, load_manifest  # noqa E402
 from model import CausalLMModel  # noqa E402
 
 from Versai.structured_buffer import VersaiStructuredBuffer  # pyright: ignore[reportMissingImports] # noqa E402
 from Versai.gguf_fileops import save_to_gguf, load_from_gguf  # pyright: ignore[reportMissingImports] # noqa E402
 from Versai.data.data_loader import get_dataloader  # pyright: ignore[reportMissingImports] # noqa E402
+from Versai.settings import settings  # pyright: ignore[reportMissingImports] # noqa E402
 
 
 def run_training(
@@ -27,8 +28,14 @@ def run_training(
     checkpoint_every_minutes: Optional[float] = None,
     load_checkpoint: Optional[str] = None,
 ) -> None:
+    manifest = load_manifest()
+
     if config is None:
-        config = CausalLMConfig()
+        config = CausalLMConfig.from_manifest(manifest)
+
+    settings.active_plugin = manifest.plugin.name
+    settings.model_name = config.model_name
+    gguf_metadata = manifest.to_gguf_metadata()
 
     # match case for cuda, amd, or mps (macos/metal)
     match True:
@@ -41,7 +48,10 @@ def run_training(
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    print(f"CausalLM Training Started on {device}")
+    print(
+        f"{config.plugin_display_name} Training Started on {device} "
+        f"for {config.default_verse_theme} with {config.default_audio_theme}"
+    )
 
     model = CausalLMModel(config).to(device)
 
@@ -106,12 +116,12 @@ def run_training(
                 print(f"Step {step:05d} | Loss: {loss.item():.4f}")
 
             if step % checkpoint_every_steps == 0 and step > 0:
-                save_to_gguf(model, step)
+                save_to_gguf(model, step, extra_metadata=gguf_metadata)
 
             if checkpoint_every_minutes is not None:
                 elapsed = (time.time() - last_checkpoint_time) / 60.0
                 if elapsed >= checkpoint_every_minutes:
-                    save_to_gguf(model, step)
+                    save_to_gguf(model, step, extra_metadata=gguf_metadata)
                     last_checkpoint_time = time.time()
 
             step += 1
@@ -120,7 +130,7 @@ def run_training(
     except KeyboardInterrupt:
         print("Training stopped by user (Ctrl+C)")
         print("Saving final checkpoint...")
-        save_to_gguf(model, step)
+        save_to_gguf(model, step, extra_metadata=gguf_metadata)
     finally:
         telemetry.close()
         print("CausalLM training shutdown clean")

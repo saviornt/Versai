@@ -4,3 +4,11 @@
 #include "Modules/ModuleManager.h"
 
 IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, Versai, "Versai" );
+
+Versai::Versai()
+{
+}
+
+Versai::~Versai()
+{
+}

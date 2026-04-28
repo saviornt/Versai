@@ -48,6 +48,8 @@ Current implementation note:
 
 - Training mode is implemented.
 - Inference mode is scaffolded but not fully implemented in `core.py`.
+- `Plugins/GameFeatures/CausalLM/Python/manifest.json` is the plugin-owned backend source of truth for metadata, GGUF export defaults, and training defaults.
+- Player edits to `manifest.json` are picked up on the next training start or plugin initialization.
 
 ---
 
@@ -64,6 +66,7 @@ Python Training (CausalLM)
 Key constraints:
 
 - Python shared memory is the source of truth.
+- Plugin-owned backend metadata/config is resolved from `manifest.json` once per run.
 - NDI is the runtime bridge.
 - No raw tensor transfer to UE in hot path.
 - Frame-based synchronization (`FrameId`, ready flags, monotonic consumption).
@@ -137,4 +140,3 @@ Historical context:
 
 `README.md` and `AGENTS.md` are intended to stay aligned.  
 If scope, architecture, or release boundaries change, update both in the same change set.
-

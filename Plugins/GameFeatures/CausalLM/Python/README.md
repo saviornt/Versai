@@ -16,4 +16,12 @@ It is the standard pre-training objective for autoregressive large language mode
 
 ## Usage
 
-This method is loaded automatically when VERSAI_TRAINING_STYLE=causal_lm
+This method is loaded from `manifest.json` when the `CausalLM` Game Feature Plugin starts.
+
+`manifest.json` is the backend source of truth for:
+
+- game metadata
+- GGUF export metadata
+- training configuration defaults
+
+Player edits to `manifest.json` apply on the next training start or plugin initialization, not during an active run.

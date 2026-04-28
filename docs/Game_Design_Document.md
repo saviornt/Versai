@@ -69,9 +69,10 @@
 
 ## 5. Technical Architecture (High-Level)
 
-- **Python 3.14 Training Core** (separate process): Training loop + FlexAttention `score_mod` telemetry + sonification sub-interpreter.
+- **Python 3.14 Training Core** (separate process): Training loop + FlexAttention telemetry + manifest-backed plugin configuration snapshot.
 - **Shared Memory IPC**: `multiprocessing.shared_memory` → zero-copy to UE5.
-- **Unreal Engine 5.7.4**: Niagara Data Interface (C++) + HUD + main game loop.
+- **Unreal Engine 5.7.4**: `UNiagaraDataInterfaceVersai` (C++) + The Verse runtime + HUD + MetaSounds.
+- **Plugin Manifest**: `Plugins/GameFeatures/CausalLM/Python/manifest.json` is the backend source of truth for plugin-owned metadata, GGUF export defaults, and training defaults. Player edits apply on next training start.
 - **Runtime Requirements**: RTX 3080+ recommended, NVIDIA drivers, Python 3.14 venv (no full CUDA Toolkit shipped).
 
 ---
@@ -103,19 +104,20 @@ We’ll use **2-week sprints** (Agile) with clear **milestones** (Waterfall-styl
 
 ### **Phase 2: UE5 Visualization Bridge (2–3 weeks – Target: May 31, 2026)**
 
-- [ ] C++ Niagara Data Interface (`UNiagaraDataInterfaceAmbience`)
+- [ ] C++ Niagara Data Interface (`UNiagaraDataInterfaceVersai`)
 - [ ] Map shared memory → Niagara particles/ribbons/vector fields
-- [ ] Real-time HUD (loss graph, style selector, data injector)
-- [ ] Basic universe visuals (point cloud + attention ribbons)
+- [ ] Real-time HUD (loss graph, model/plugin identity, data injector, frame/debug state)
+- [ ] Basic `Cosmic Verse` visuals (point cloud + attention ribbons)
 - [ ] PCG universe + Niagara VFX visualized from Playground data via NDI
 
 **Milestone 2:** “Universe Visualized” – Training loop drives Niagara in-editor.
 
 ### **Phase 3: Sonification Engine (1–2 weeks – Target: June 14, 2026)**
 
-- [ ] WASAPI Exclusive Mode audio thread (sub-interpreter)
-- [ ] Full hierarchical mapping (embedding timbre, attention harmonics, etc.)
-- [ ] Sync audio pulses with Niagara particles
+- [ ] MetaSounds-driven sonification bound to NDI telemetry
+- [ ] Full hierarchical mapping (embedding timbre, attention harmonics, loss texture, pulse)
+- [ ] Sync MetaSound parameter updates with the same frame transitions used by Niagara and PCG
+- [ ] Resolve audio theme metadata from plugin `manifest.json` once per training start
 
 **Milestone 3:** “Living Ambience” – Full audio-visual feedback loop.
 
@@ -159,7 +161,7 @@ We’ll use **2-week sprints** (Agile) with clear **milestones** (Waterfall-styl
 | VRAM exhaustion on RTX 3080 | Medium | Tiny models + LoRA + gradient checkpointing |
 | Python–UE5 version drift | Low | Environment variables + locked venv |
 | Rider indexer pain | High | VS Code fallback + `pyproject.toml` |
-| Audio glitches (WASAPI) | Medium | Sub-interpreter + incremental GC |
+| Audio glitches (MetaSounds parameter jitter) | Medium | One persistent MetaSound instance + bounded parameter updates |
 
 ---
 

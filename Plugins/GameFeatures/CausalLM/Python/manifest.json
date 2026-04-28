@@ -1,0 +1,55 @@
+{
+  "plugin": {
+    "name": "CausalLM",
+    "display_name": "CausalLM",
+    "version": "1.0.0",
+    "description": "Standard causal language modeling using next-token prediction for autoregressive training.",
+    "compatible_with": [
+      "base_game"
+    ],
+    "tags": [
+      "self_supervised",
+      "autoregressive",
+      "decoder_only"
+    ]
+  },
+  "game": {
+    "default_verse_theme": "Cosmic Verse",
+    "default_audio_theme": "Versai Core",
+    "hud_modes": [
+      "Light",
+      "Dark",
+      "System"
+    ],
+    "telemetry_profile": "cosmic_verse_core",
+    "audio_parameter_profile": "versai_core"
+  },
+  "gguf": {
+    "architecture": "llama",
+    "model_name": "causal_lm",
+    "training_style_id": "causal_lm",
+    "metadata_prefix": "versai",
+    "export_tags": [
+      "mvp",
+      "cosmic_verse",
+      "metasounds"
+    ]
+  },
+  "training": {
+    "method": "transformers",
+    "type": "decoder",
+    "vocab_size": 32000,
+    "d_model": 256,
+    "n_heads": 8,
+    "n_layers": 4,
+    "feedforward_multiplier": 4,
+    "batch_size": 32,
+    "seq_length": 128,
+    "learning_rate": 0.0001,
+    "dropout": 0.1,
+    "activation_function": "gelu",
+    "batch_first": true,
+    "norm_first": true,
+    "bias": true
+  }
+}
