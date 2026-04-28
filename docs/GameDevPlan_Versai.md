@@ -1,5 +1,15 @@
 # Engineering Neural Ambience: A Technical Framework for Real-Time Neural Network Training and Procedural Universe Synthesis
 
+## Current Use Note (April 28, 2026)
+
+This file is retained as **historical context**.  
+For active implementation and RAG grounding, prioritize:
+
+- `docs/Architecture_Design_Document.md`
+- `docs/NDI-Based Design.md`
+- `docs/Game_Design_Document.md`
+- `docs/Versai UI-UX Design Guide.md`
+
 ## ⚠️ HISTORICAL TECHNICAL FRAMEWORK (April 26, 2026)
 
 This document reflects the pre-hybrid vision.  

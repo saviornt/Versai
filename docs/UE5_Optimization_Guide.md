@@ -1,10 +1,10 @@
-# UE5 Optimization Guide
+﻿# UE5 Optimization Guide
 
-**Versai – Procedural Vibe Training Simulator**  
+**Versai â€“ Procedural Vibe Training Simulator**  
 **Document Version:** 1.1 (April 27, 2026)  
-**Status:** Active – Comprehensive performance blueprint for UE5.7 source-built project  
+**Status:** Active â€“ Comprehensive performance blueprint for UE5.7 source-built project  
 **File Location:** `docs/UE5_Optimization_Guide.md`  
-**References:** `PCG_Niagara_Hybrid_Design.md`, `SharedMemory_StructuredBuffer_Design.md`, `Python_Playground_API.md`, Architecture Design Document v3, live repo
+**References:** `NDI-Based Design.md`, `SharedMemory_StructuredBuffer_Design.md`, `Python_Playground_API.md`, Architecture Design Document v3, live repo
 
 ---
 
@@ -18,19 +18,19 @@ This guide provides **every practical optimization** for Unreal Engine 5.7 in th
 - Heavy PCG runtime generation + Niagara
 - Zero-copy shared memory via custom `UNiagaraDataInterfaceVersai`
 - GIL-locked Python 3.14 external training process (now audio-free)
-- Single-player, meditative experience — no multiplayer/network overhead
+- Single-player, meditative experience â€” no multiplayer/network overhead
 
 ---
 
 ## 2. In-Engine Customization (Project Settings & Scalability)
 
-### Project Settings → General
+### Project Settings â†’ General
 
-- **Target Hardware**: Windows 10/11, Scalability Level “Cinematic” as baseline, then tune down selectively.
+- **Target Hardware**: Windows 10/11, Scalability Level â€œCinematicâ€ as baseline, then tune down selectively.
 - **Use Forward Shading**: Disabled (we need Lumen + Nanite).
 - **Virtual Shadow Maps**: Enabled (best for dynamic PCG/Niagara shadows).
 
-### Scalability Settings (Project Settings → Scalability)
+### Scalability Settings (Project Settings â†’ Scalability)
 
 - Use **Effect Types** + **Niagara Effect Budgets** for all Versai VFX.
 - Set `r.Scalability.Quality` CVars per platform in `Scalability.ini`.
@@ -110,7 +110,7 @@ r.Niagara.MaxGPUParticles=200000
 
 ## 6. Niagara-Specific Optimizations
 
-- Data Channels for PCG → Niagara inheritance.
+- Data Channels for PCG â†’ Niagara inheritance.
 - Lightweight Emitters + Effect Budgets.
 - GPU simulation for high particle counts.
 - Materials: cheap additive/transparent, limit overdraw.
@@ -125,9 +125,9 @@ r.Niagara.MaxGPUParticles=200000
 
 - NDI exposes rich telemetry (loss, activation, gradient_mag, attention_mean, etc.) as **User Parameters** / **Data Channel attributes**.
 - MetaSounds graphs read these parameters directly to drive:
-  - Timbre (embeddings → additive synthesis)
-  - Harmonics (attention → resonant filters)
-  - Rhythm / pulse (loss & gradient → envelope / LFO)
+  - Timbre (embeddings â†’ additive synthesis)
+  - Harmonics (attention â†’ resonant filters)
+  - Rhythm / pulse (loss & gradient â†’ envelope / LFO)
   - Spatialization / reverb (layer-based ambience)
 - One master MetaSound asset (`MS_VersaiSonification`) bound to the NDI instance.
 
@@ -148,7 +148,7 @@ r.Niagara.MaxGPUParticles=200000
 - Disable unnecessary Audio Mixer features:
   - `au.DisableReverb=1` unless needed for specific layers
   - `au.DisableSpatialization=0` (we want full 3D)
-- NDI → MetaSound binding: Use `GetFloat` / `GetVector` VM functions exposed from NDI (zero-copy).
+- NDI â†’ MetaSound binding: Use `GetFloat` / `GetVector` VM functions exposed from NDI (zero-copy).
 
 ### Quality vs Performance Trade-offs
 
@@ -196,3 +196,4 @@ Since we are source-built:
 
 **This document is a living blueprint.**  
 It will be updated at the end of every sprint as we discover more engine-source wins.
+

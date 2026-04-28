@@ -7,6 +7,20 @@
 **Status:** Post-MVP / DLC Expansion Phase
 **File Location:** `Versai/Sources/Design/Plugins/Models_DLC.md` (living document)
 
+## MVP Boundary Note (Important)
+
+This document is intentionally **post-MVP**.  
+The MVP/Beta baseline ships with:
+
+- One built-in model: `CausalLM`
+- Three HUD/UI packs: `Light`, `Dark`, `System`
+- One official Verse theme: `Cosmic Verse`
+- One official audio theme
+
+Marketplace, model trading, and community DLC distribution begin after MVP/Beta.
+
+---
+
 ## 1. Vision & High-Level Pitch
 
 **Versai Models as DLC turns every trained universe into a shareable, installable “Game Feature Plugin”** — a complete, self-contained package that players can download, drop into their game, and instantly load as a new living intelligence with its own visual/auditory ambience, training style, and inference personality.

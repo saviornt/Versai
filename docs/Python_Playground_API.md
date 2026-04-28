@@ -1,8 +1,8 @@
-# Python Playground API
+﻿# Python Playground API
 
-**Versai – Procedural Vibe Training Simulator**  
+**Versai â€“ Procedural Vibe Training Simulator**  
 **Document Version:** 1.0 (April 27, 2026)  
-**Status:** Active – Single source of truth for the Python backend  
+**Status:** Active â€“ Single source of truth for the Python backend  
 **File Location:** `docs/Python_Playground_API.md`  
 **References:** `Python/Versai/core.py`, `settings.py`, `shared_memory.py`, `gguf_fileops.py`, `SharedMemory_StructuredBuffer_Design.md`, Architecture Design Document v3
 
@@ -15,7 +15,7 @@ The Playground is the **Python/Versai** package that owns:
 * Training loop (PyTorch 2.11 transformer + FlexAttention telemetry)
 * Data loading / reduction layer
 * GGUF checkpointing
-* Shared-memory bridge to UE5 (NiagaraDataInterface → PCG + Niagara hybrid)
+* Shared-memory bridge to UE5 (NiagaraDataInterface â†’ PCG + Niagara hybrid)
 
 **Core entry point:** `core.py`
 
@@ -36,24 +36,24 @@ def main():
 * GGUF auto-save via `gguf_fileops.py`.
 * GIL-locked Python 3.14 safe (training runs in separate process).
 
-**Strengths**: Already supports hot-swap of training styles via plugins and branch management.  
+**Strengths**: Already supports modular trainer loading and branch management.  
 **Limitations**: Legacy shared-memory (pickle + single buffer) blocks full PCG/Niagara performance.
 
 ---
 
-## 2. MVP (Next Sprint – Phase 1)
+## 2. MVP (Next Sprint â€“ Phase 1)
 
-**Goal**: Make the Playground production-ready for the hybrid NDI → PCG + Niagara architecture while preserving the existing plugin system.
+**Goal**: Make the Playground production-ready for the hybrid NDI -> The Verse architecture while preserving a clean path to post-MVP plugin expansion.
 
 **Required deliverables**:
 
 1. **Add `VersaiStructuredBuffer`** (see `SharedMemory_StructuredBuffer_Design.md`).
 2. **Create `core/schemas.py`** with Pydantic models + NumPy structured dtypes.
-3. **Implement data-reduction layer** in each plugin’s `trainer.py`:
+3. **Implement data-reduction layer** in each pluginâ€™s `trainer.py`:
 
    ```python
    def reduce_model_state(model, step: int) -> LayerFrame:
-       """Transform raw tensors → GPU-friendly PCG structs (zero allocation)."""
+       """Transform raw tensors â†’ GPU-friendly PCG structs (zero allocation)."""
        # ... feature extraction
        return LayerFrame(...)  # Pydantic model
    ```
@@ -77,14 +77,14 @@ def main():
 
 ---
 
-## 3. Optimization (Post-MVP – Phase 2)
+## 3. Optimization (Post-MVP â€“ Phase 2)
 
 Focus on **performance gains** when paired with UE5 shared-memory + RTX 3080 (or older hardware) and GIL-locked Python 3.14:
 
 | Area                        | Current | Optimized Target                              | Expected Gain |
 |-----------------------------|---------|-----------------------------------------------|---------------|
 | Shared-memory write         | pickle + circular | Structured NumPy views + double buffering    | < 0.8 ms/frame |
-| Reduction layer             | ad-hoc     | Vectorized NumPy + pre-allocated arrays       | 3-5× faster |
+| Reduction layer             | ad-hoc     | Vectorized NumPy + pre-allocated arrays       | 3-5Ã— faster |
 | Training process isolation  | basic      | Dedicated `multiprocessing.Process` + sub-interpreter | No GIL contention for audio/NDI |
 | Data transfer to UE5        | scalar only| Zero-copy reinterpret in C++ NDI              | < 0.4 ms read |
 | Hot-reload / plugin swap    | full restart | Live plugin re-import + buffer recreation only| Instant style switch |
@@ -103,22 +103,24 @@ Focus on **performance gains** when paired with UE5 shared-memory + RTX 3080 (or
 
 ## 4. Future Enhancements (Phase 3+ / Post-MVP)
 
-* **Python 3.15 migration** – Leverage improved allocator + JIT for 15-25 % overall speedup.
-* **Full free-threaded build** – Remove GIL entirely for audio + sonification sub-interpreters.
-* **Plugin hot-reload without restart** – `importlib.reload` + buffer state migration.
-* **Multi-model / universe merging** – Shared buffer supports multiple `LayerFrame` streams.
-* **Deterministic replay mode** – Record shared-memory snapshots for training playback.
-* **Bio-reactive inputs** – Real-time sensor streams injected into reduction layer.
-* **GGUF + Ambience Metadata embedding** – Extend `gguf_fileops.py` to store PCG/Niagara presets.
-* **Distributed Playground (stretch)** – Optional Ray / Dask for larger models while keeping single-player local mode.
+* **Python 3.15 migration** â€“ Leverage improved allocator + JIT for 15-25 % overall speedup.
+* **Full free-threaded build** â€“ Remove GIL entirely for audio + sonification sub-interpreters.
+* **Plugin hot-reload without restart** â€“ `importlib.reload` + buffer state migration.
+* **Multi-model / universe merging** â€“ Shared buffer supports multiple `LayerFrame` streams.
+* **Deterministic replay mode** â€“ Record shared-memory snapshots for training playback.
+* **Bio-reactive inputs** â€“ Real-time sensor streams injected into reduction layer.
+* **GGUF + Ambience Metadata embedding** â€“ Extend `gguf_fileops.py` to store PCG/Niagara presets.
+* **Distributed Playground (stretch)** â€“ Optional Ray / Dask for larger models while keeping single-player local mode.
 
 **All enhancements will maintain**:
 
 * Backward compatibility with existing plugins.
 * Zero dynamic allocation in hot path.
-* Strict adherence to Pydantic v2 settings pattern (`VERSAI_*` → `settings.*`).
+* Strict adherence to Pydantic v2 settings pattern (`VERSAI_*` â†’ `settings.*`).
 
 ---
 
 **This document is a living blueprint.**  
 It will be updated at the end of every sprint. All tasks above are written as ready-to-drop Kanban cards.
+
+

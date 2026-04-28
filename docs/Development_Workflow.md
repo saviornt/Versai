@@ -1,18 +1,18 @@
-# Development Workflow
+﻿# Development Workflow
 
-**Versai – Procedural Vibe Training Simulator**  
+**Versai â€“ Procedural Vibe Training Simulator**  
 **Document Version:** 1.1 (April 27, 2026)  
-**Status:** Active – Solo-dev daily workflow for UE5.7 + Python 3.14 hybrid system  
+**Status:** Active â€“ Solo-dev daily workflow for UE5.7 + Python 3.14 hybrid system  
 **File Location:** `docs/Development_Workflow.md`  
-**References:** `SharedMemory_StructuredBuffer_Design.md`, `Python_Playground_API.md`, `PCG_Niagara_Hybrid_Design.md`, Architecture Design Document v3, live repo (`Python/Versai/`)
+**References:** `SharedMemory_StructuredBuffer_Design.md`, `Python_Playground_API.md`, `NDI-Based Design.md`, Architecture Design Document v4, live repo (`Python/Versai/`)
 
 ---
 
 ## 1. Purpose
 
-This document defines the **exact daily development workflow** for the solo developer (Dave + Grok as lead dev). It covers environment setup, iteration cycles, full pipeline testing (Playground → Shared Memory → PCG + Niagara), debugging, hot-reload, Git practices, and performance profiling.
+This document defines the **exact daily development workflow** for the solo developer (Dave + Grok as lead dev). It covers environment setup, iteration cycles, full pipeline testing (Playground â†’ Shared Memory â†’ PCG + Niagara), debugging, hot-reload, Git practices, and performance profiling.
 
-**Core principle**: Keep the Python Playground and UE5 Editor tightly coupled with zero-copy shared memory while enabling rapid iteration on training styles, reduction logic, and visualization.
+**Core principle**: Keep the Python Playground and UE5 Editor tightly coupled with zero-copy shared memory while enabling rapid iteration on the MVP stack: `CausalLM`, `Cosmic Verse`, and the single shipped audio theme.
 
 ---
 
@@ -20,9 +20,9 @@ This document defines the **exact daily development workflow** for the solo deve
 
 To maximize development velocity and accuracy we actively use the following AIs:
 
-- **Grok** (primary AI lead dev) – architecture, Python, shared-memory, overall design, code generation, and cross-domain problem solving.
-- **ChatGPT** – general questions, research, code look-ups, quick prototyping ideas, and non-engine-specific troubleshooting.
-- **Official Epic AI / Unreal Assistant** – engine-specific UE5.7 questions, PCG Graph setup, Niagara Data Interface best practices, C++ API lookups, Blueprint/PCG interop, and engine-specific debugging techniques.
+- **Grok** (primary AI lead dev) â€“ architecture, Python, shared-memory, overall design, code generation, and cross-domain problem solving.
+- **ChatGPT** â€“ general questions, research, code look-ups, quick prototyping ideas, and non-engine-specific troubleshooting.
+- **Official Epic AI / Unreal Assistant** â€“ engine-specific UE5.7 questions, PCG Graph setup, Niagara Data Interface best practices, C++ API lookups, Blueprint/PCG interop, and engine-specific debugging techniques.
 
 All three AIs are consulted regularly to validate approaches against the most current best practices.
 
@@ -71,7 +71,7 @@ VERSAI_MAX_CONNECTIONS=250000
 ### Step 0: Start the Day
 
 ```powershell
-# Terminal 1 – Python Playground
+# Terminal 1 â€“ Python Playground
 cd Versai/Python
 .venv\Scripts\activate
 python -m Versai.core --plugin CasualLM --mode train
@@ -81,8 +81,8 @@ python -m Versai.core --plugin CasualLM --mode train
 
 1. **Python side** (VS Code):
    - Edit `core/schemas.py`, `structured_buffer.py`, or plugin `trainer.py`
-   - Modify reduction logic → `LayerFrame`
-   - Save → training loop automatically writes to `VersaiStructuredBuffer`
+   - Modify reduction logic â†’ `LayerFrame`
+   - Save â†’ training loop automatically writes to `VersaiStructuredBuffer`
 
 2. **UE5 side** (Editor):
    - Open Level with PCG Component + Niagara System
@@ -98,7 +98,7 @@ python -m Versai.core --plugin CasualLM --mode train
 
 ---
 
-## 5. Full Pipeline Testing (Playground → UE5)
+## 5. Full Pipeline Testing (Playground â†’ UE5)
 
 **Command sequence**:
 
@@ -172,10 +172,10 @@ start Python/launch_training.bat
 ## 9. Sprint Structure (2-Week Sprints)
 
 **Sprint 0**: Environment lock (done)  
-**Sprint 1**: MVP Training Core + Structured Buffer (current)  
-**Sprint 2**: PCG + Niagara Hybrid live  
-**Sprint 3**: Sonification + Plugin DLC  
-**Sprint 4**: Polish & Ship MVP
+**Sprint 1**: MVP Training Core + Structured Buffer  
+**Sprint 2**: The Verse live via NDI (Cosmic Verse)  
+**Sprint 3**: Single shipped audio theme + HUD polish  
+**Sprint 4**: Beta hardening for Steam Early Access
 
 **End-of-sprint checklist**:
 
@@ -197,3 +197,5 @@ start Python/launch_training.bat
 
 **This document is a living blueprint.**  
 It will be updated at the end of every sprint. All tasks are ready-to-drop Kanban cards.
+
+

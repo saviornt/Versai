@@ -31,6 +31,9 @@
 # Rider plugin
 /Plugins/Developer/RiderLink/
 
+# Agents
+AGENTS.md
+
 ############################################
 # OS / Misc
 ############################################

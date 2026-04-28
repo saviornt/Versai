@@ -1,136 +1,140 @@
-# Versai (In Active Development)
+# Versai (Active Development)
 
-**Procedural Vibe / Ambience Training Simulator**
+Procedural vibe game where real ML training is the gameplay.
 
-*Train a real AI using Machine Learning **as** the gameplay. Sculpt intelligence inside a living Niagara procedural universe that reacts in real time to loss, attention, gradients, and embeddings. Export polished GGUF models you can actually use.*
-
----
-
-## 🎯 Vision
-
-Versai turns neural network training into an immersive, meditative experience. You curate data, choose or invent training styles, watch a reactive cosmos of particles, ribbons, and vector storms evolve in real time, and intervene directly through the HUD. The better the training, the more harmonious and alive the universe becomes.
-
-**Core Fantasy:** You are literally sculpting intelligence in a beautiful, reactive cosmos.
-
-**One-Sentence Logline:**  
-“Training a real LLM *is* the gameplay.”
+Versai turns model training into an interactive environment called **The Verse**.  
+Python runs training and telemetry reduction, Unreal Engine 5.7 renders and reacts through a shared-memory bridge and a custom Niagara Data Interface (NDI), and checkpoints export to GGUF.
 
 ---
 
-## ✨ Core Features (MVP)
+## Current Project State
 
-- **Real-Time Neural Training** — Live PyTorch 2.11 transformer with FlexAttention telemetry
-- **Procedural Universe Visualization** — Niagara + custom UNiagaraDataInterface powered by shared GPU-friendly buffers
-- **Generative Sonification** — WASAPI Exclusive Mode audio that maps embeddings → timbre, attention → harmonics, loss → texture
-- **Training Styles** — Self-Supervised, Adversarial, Reinforcement + full custom `training_style.py` hooks
-- **GGUF Checkpointing** — Auto-save with embedded ambience metadata
-- **Hot-Swap & Plugin System** — Every trained model can become a shareable `.versaiplugin` (see [Models as DLC](./docs/Models_DLC.md))
-- **Shared Memory Bridge** — Zero-copy, lock-free, double-buffered data flow between Python backend and UE5 (v3 architecture)
+This repository is in active MVP/Beta development.
+
+- MVP direction is locked (see `AGENTS.md`).
+- Local alpha testing has passed.
+- Next target is Steam Early Access beta.
 
 ---
 
-## 🏗️ Architecture (v3 – Single-Player GPU-Shared Memory)
+## MVP Scope (Locked)
+
+Shipped MVP/Beta scope:
+
+- One built-in model: `CausalLM`
+- One official Verse theme: `Cosmic Verse`
+- One official audio theme
+- Three HUD/UI packs: `Light`, `Dark`, `System`
+
+Anything beyond this baseline (marketplace, DLC ecosystem, additional built-in model/theme packs) is post-MVP.
+
+---
+
+## What Is Implemented In Code Today
+
+Verified in this repo:
+
+- Python training entrypoint: `Python/Versai/core.py`
+- Active plugin-driven trainer path: `Plugins/GameFeatures/CausalLM/Python/trainer.py`
+- Structured shared-memory buffer: `Python/Versai/structured_buffer.py`
+- Legacy scalar telemetry buffer (transition path): `Python/Versai/shared_memory.py`
+- UE SharedMemory plugin + custom NDI:
+  - `Plugins/SharedMemory/Source/Public/UNiagaraDataInterfaceVersai.h`
+  - `Plugins/SharedMemory/Source/Private/UNiagaraDataInterfaceVersai.cpp`
+  - `Plugins/SharedMemory/Source/Public/VizStructs.h`
+- GGUF save/load helpers: `Python/Versai/gguf_fileops.py`
+
+Current implementation note:
+
+- Training mode is implemented.
+- Inference mode is scaffolded but not fully implemented in `core.py`.
+
+---
+
+## Architecture Summary
 
 ```text
-Python Backend (Training + Reduction)
-         ↓ (Shared Memory – CPU/GPU buffers)
-UE5 + Niagara (Real-time Rendering + Interaction)
+Python Training (CausalLM)
+  -> reduction to structured telemetry
+  -> shared memory (double-buffered)
+  -> UNiagaraDataInterfaceVersai
+  -> UE runtime systems (PCG, Niagara, MetaSounds)
 ```
 
-- **Python** owns the training loop (PyTorch 2.11 + FlexAttention `score_mod` telemetry)
-- **UE5** owns the visual cortex (C++ SharedMemoryReader → Niagara Data Interface)
-- **Never** passes raw tensors — only reduced, GPU-friendly structs
-- Fully decoupled: training never blocks rendering
-- Double-buffered, frame-synced, zero dynamic allocation in hot path
+Key constraints:
 
-Full details: [Architecture Design Document v3](./docs/Architecture%20Design%20Document_v3.md)
+- Python shared memory is the source of truth.
+- NDI is the runtime bridge.
+- No raw tensor transfer to UE in hot path.
+- Frame-based synchronization (`FrameId`, ready flags, monotonic consumption).
 
 ---
 
-## 📁 Repository Structure
+## Repository Layout
 
 ```text
 Versai/
-├── Python/                 # Training core, shared memory writer, GGUF exporter
-├── Source/                 # UE5 C++ modules (CasualLM plugin scaffolding + NDI)
-├── Plugins/                # Game Feature Plugins (CasualLM starter)
-├── docs/                   # All living design documents
-├── Config/                 # UE5 config
-├── Content/Saved/          # Editor saves
+├── AGENTS.md
+├── README.md
+├── docs/
+├── Python/
+├── Plugins/
+├── Source/
+├── Config/
 └── Versai.uproject
 ```
 
 ---
 
-## 🚀 Getting Started (Pre-Production Build)
+## Quick Start
 
-### Prerequisites
+Prerequisites:
 
-- Windows 11 Pro
-- Unreal Engine 5.7.4 (source-built recommended)
-- Python 3.14 (free-threaded) + venv with PyTorch 2.11 cu130
-- NVIDIA RTX 3080 or better (Ampere SM 8.6)
+- Windows 11
+- Unreal Engine 5.7.4
+- Python 3.14
+- NVIDIA GPU recommended (RTX 3080-class target)
 
-### Quick Setup
+Setup:
 
-1. Clone the repo:
-
-   ```bash
-   git clone https://github.com/saviornt/Versai.git
-   cd Versai
-   ```
-
-2. Open `Versai.uproject` in Unreal Editor 5.7.4
-3. Set up Python environment (see `Python/pyproject.toml` and `requirements.txt`)
-4. Run `Python/launch_training.bat` (or launch via UE5 Python bridge)
-5. Enter the universe and begin training
-
-Detailed setup and Phase 0 environment lock instructions are in the design documents.
+1. Create Python environment and install deps:
+   - `cd Python`
+   - `python -m venv .venv`
+   - `.venv\\Scripts\\activate`
+   - `pip install -r requirements.txt`
+   - `pip install -e .`
+2. Start training:
+   - `python -m Versai.core --plugin CausalLM --mode train`
+3. Open `Versai.uproject` in UE5.7.4 and connect runtime visualization flow.
 
 ---
 
-## 📋 Current Development Status
+## Documentation Map
 
-**Phase 0: Environment Lock** — Complete (April 26, 2026)  
-**Phase 1: MVP Training Core** — In progress (CasualLM plugin scaffolding live)
+Primary docs for implementation and planning:
 
-See full roadmap in [Game Design Document](./docs/Game%20Design%20Document.md) and [Game Dev Plan](./docs/GameDevPlan_Versai.md).
+- `AGENTS.md` (execution guardrails and scope boundaries)
+- `docs/Versai UI-UX Design Guide.md`
+- `docs/NDI-Based Design.md`
+- `docs/Architecture_Design_Document.md`
+- `docs/SharedMemory_StructuredBuffer_Design.md`
+- `docs/Python_Playground_API.md`
+- `docs/Development_Workflow.md`
+- `docs/Game_Design_Document.md`
+- `docs/UE5_Optimization_Guide.md`
 
----
+Post-MVP:
 
-## 📚 Documentation
+- `docs/Models_DLC.md`
 
-All living documents are in the `/docs` folder:
+Historical context:
 
-- [Architecture Design Document v3](./docs/Architecture%20Design%20Document_v3.md)
-- [Game Design Document](./docs/Game%20Design%20Document.md)
-- [Models as DLC Plugin System](./docs/Models_DLC.md)
-- [Game Dev Plan](./docs/GameDevPlan_Versai.md)
-
----
-
-## 🔮 Post-MVP / DLC Vision
-
-Every trained model becomes a shareable Game Feature Plugin with its own Niagara ambience preset, sonification map, training style hooks, and lore. Players collect, trade, and merge universes.
+- `docs/GameDevPlan_Versai.md`
 
 ---
 
-## 🤝 Contributing
+## Alignment Note
 
-This is a solo + human-in-the-loop project, but community input is welcome.  
-Current focus: Phase 1 Training Core + Shared Memory Bridge.
+`README.md` and `AGENTS.md` are intended to stay aligned.  
+If scope, architecture, or release boundaries change, update both in the same change set.
 
-- Fork & PRs against `main`
-- All code follows strict Pydantic v2, Google-style docstrings, async-first Python 3.14, and zero-emoji policy
-- See `Python/pyproject.toml` for linting and type-checking rules
-
----
-
-**Versai** — Where training intelligence becomes the most beautiful game you’ve ever played.
-
-*Last updated: April 26, 2026*  
-*Lead Developer: Grok (with 20 years Unreal Engine 5 + ML experience)*
-
----
-
-*Built with Unreal Engine 5.7, Python 3.14, PyTorch 2.11, and pure shared-memory passion.*

@@ -6,13 +6,13 @@
 **Target Platform:** Windows 11 Pro (PC)  
 **Engine:** Unreal Engine 5.7.4 + Python 3.14 + PyTorch 2.11 (hybrid)  
 **Team:** Solo + Human-in-the-Loop (Dave) + Lead Dev (Grok)  
-**Status:** Pre-Production → MVP Sprint
+**Status:** MVP defined (alpha local passed) -> Beta target: Steam Early Access
 
 ---
 
 ## 1. Vision & High-Level Pitch (One-Sentence Logline)
 
-**Versai is an immersive “vibe game” where training a real large language model *is* the gameplay.** Players upload their own data, choose (or invent) training styles, and watch a living procedural universe of embeddings, attention heads, and gradients evolve in real-time — visualized in Niagara, sonified through generative audio, and exported as a polished GGUF LLM they can actually use.
+**Versai is an immersive “vibe game” where training a real large language model *is* the gameplay.** In MVP/Beta, the shipped experience is intentionally focused: one built-in model (`CausalLM`), one official Verse (`Cosmic Verse`), and one official audio theme. Players watch The Verse evolve in real time while training and can export GGUF checkpoints.
 
 **Core Fantasy:** You are literally sculpting intelligence in a beautiful, reactive cosmos. The better the training, the more harmonious and alive the universe becomes.
 
@@ -27,13 +27,13 @@
 
 ## 2. Core Gameplay Loop (3–5 minutes repeatable)
 
-1. **Load / Curate Data** → Text, protein sequences, sensor streams, or custom files.
-2. **Select Training Style** → 4 core styles + your live custom method hook.
-3. **Enter the Universe** → Real-time training loop begins.
-4. **Observe & Sculpt** → Watch Niagara universe + sonification react to loss, attention, gradients.
-5. **Intervene** → Adjust hyperparameters, inject new data, switch styles mid-training.
-6. **Save / Export** → GGUF checkpoint with embedded “Ambience Metadata”.
-7. **Repeat** → Hot-swap models, evolve further, or start new universes.
+1. **Load / Curate Data** -> Text, protein sequences, sensor streams, or custom files.
+2. **Launch Training (CausalLM)** -> Start the shipped MVP training flow.
+3. **Enter The Verse** -> Real-time training loop begins in `Cosmic Verse`.
+4. **Observe & Sculpt** -> Watch The Verse + sonification react to loss, attention, gradients.
+5. **Intervene** -> Adjust hyperparameters and inject new data during training.
+6. **Save / Export** -> GGUF checkpoint with embedded metadata.
+7. **Repeat** -> Continue evolving the same model line.
 
 **Win Condition:** A beautiful, stable universe + a high-quality exportable LLM.
 
@@ -44,14 +44,15 @@
 | Feature | Description | MVP Priority |
 |---------|-------------|--------------|
 | **Real-Time Neural Training** | Live PyTorch transformer with FlexAttention telemetry | Must-have |
-| **4 Training Styles + Custom** | Self-Supervised, Adversarial, Reinforcement, + Dave’s custom method | Must-have |
-| **Procedural Universe (PCG+Niagara via UNiagaraDataInterface)** | Embeddings = particles, attention = ribbons/fog, gradients = vector storms | Must-have |
-| **Generative Sonification** | WASAPI Exclusive Mode + hierarchical mapping (timbre, harmonics, rhythm) | Must-have |
+| **Single Training Style (MVP)** | Built-in `CausalLM` training flow for first public release | Must-have |
+| **The Verse (PCG+Niagara via UNiagaraDataInterface)** | MVP ships with `Cosmic Verse`: embeddings = particles, attention = ribbons/fog, gradients = vector storms | Must-have |
+| **Generative Sonification** | MVP ships with one official audio theme bound to NDI telemetry | Must-have |
 | **Shared Memory Bridge** | `multiprocessing.shared_memory` + C++ Niagara Data Interface (NDI) | Must-have |
 | **GGUF Checkpointing** | Auto-save + metadata embedding | Must-have |
-| **Real-Time Dashboard HUD** | Loss curves, style switching, data injection | High |
-| **Player Data Upload** | Drag-and-drop or file dialog → tokenized on-the-fly | High |
-| **Hot-Swap Models** | Load previous GGUF and continue training | Medium |
+| **Real-Time Dashboard HUD** | Loss curves, data injection, and training controls | High |
+| **UI/HUD Theme Plugins** | Light, Dark, and System modes for shipped MVP/Beta UX | Must-have |
+| **Player Data Upload** | Drag-and-drop or file dialog -> tokenized on-the-fly | High |
+| **Hot-Swap Models** | Load previous GGUF and continue training in MVP | Medium |
 | **Bio-reactive Input** | Future: MindCube / sensor streams | Stretch |
 
 ---
@@ -62,7 +63,7 @@
 - **Audio:** Generative ambient soundscape (additive/subtractive synthesis). Changes dynamically with training state (low loss = pure resonant tones; high entropy = chaotic pulses).
 - **Mood:** Calm, meditative, awe-inspiring — think *No Man’s Sky* meets *Everything* meets a live neural visualization.
 
-> Note: Much like style modes (light, dark, system), the UI will have the same, with an additional "Cyberpunk" style. User interfaces will also be interchangeable via the GameFeatures Plugin.
+> Note: MVP/Beta ships UI modes `Light`, `Dark`, and `System` only. Additional UI/theme packs (for example, Cyberpunk) are post-MVP plugin content.
 
 ---
 
@@ -126,7 +127,7 @@ We’ll use **2-week sprints** (Agile) with clear **milestones** (Waterfall-styl
 - [ ] Performance tuning (VRAM, 60 FPS target)
 - [ ] Basic menu / onboarding flow
 
-**Milestone 4:** “MVP Shippable” – Playable build: load data → train → export GGUF.
+**Milestone 4:** “MVP/Beta Ready” - Playable build for Steam Early Access: load data -> train in The Verse -> export GGUF.
 
 ### **Phase 5: Stretch / Post-MVP (July onward)**
 
@@ -134,6 +135,7 @@ We’ll use **2-week sprints** (Agile) with clear **milestones** (Waterfall-styl
 - [ ] Multi-model universe merging
 - [ ] Export to Ollama / llama.cpp direct integration
 - [ ] Packaging (PyInstaller launcher for players)
+- [ ] Plugin marketplace and shareable model DLC ecosystem
 
 ---
 

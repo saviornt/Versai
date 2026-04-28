@@ -6,7 +6,7 @@
 **Target Platform:** Windows 11 Pro (PC)  
 **Engine:** Unreal Engine 5.7.4 + Python 3.14 + PyTorch 2.11 (hybrid)  
 **Team:** Solo + Human-in-the-Loop (Dave) + Lead Dev (Grok)  
-**Status:** Pre-Production → MVP Sprint
+**Status:** MVP architecture locked (alpha local passed) -> Beta target: Steam Early Access
 
 ## UE5 Neural Training Visualization System (Single-Player GPU-Shared Memory Architecture)
 
@@ -23,7 +23,20 @@ This system is a **local, single-player real-time neural training visualization 
 
 ---
 
-# 2. Core Design Philosophy (IMPORTANT)
+# 2. MVP Scope (Locked for Beta)
+
+MVP/Beta ships with:
+
+* Single training model: `CausalLM`
+* Single official Verse theme: `Cosmic Verse`
+* Single official audio theme
+* UI/HUD packs: `Light`, `Dark`, and `System`
+
+Marketplace and model DLC systems are post-MVP.
+
+---
+
+# 3. Core Design Philosophy (IMPORTANT)
 
 This system is NOT:
 
@@ -37,7 +50,7 @@ This system IS:
 
 ---
 
-# 3. High-Level Architecture
+# 4. High-Level Architecture
 
 ```mermaid
 flowchart TB
@@ -64,7 +77,7 @@ flowchart TB
 
 ---
 
-# 4. Core Data Flow
+# 5. Core Data Flow
 
 ## 4.1 Write path (Python → UE)
 
@@ -87,7 +100,7 @@ flowchart TB
 
 ---
 
-# 5. Critical Upgrade: Data Reduction Layer
+# 6. Critical Upgrade: Data Reduction Layer
 
 This is the MOST important part of the entire system.
 
@@ -142,7 +155,7 @@ struct VisGenPCG {
 
 ---
 
-# 6. Shared Memory Design (CRITICAL)
+# 7. Shared Memory Design (CRITICAL)
 
 ## 6.1 Requirements
 
@@ -180,7 +193,7 @@ UE only reads frames where:
 
 ---
 
-# 7. Python Backend (v3 architecture)
+# 8. Python Backend (v3 architecture)
 
 ## 7.1 Stack
 
@@ -223,7 +236,7 @@ while training:
 
 ---
 
-# 8. Unreal Engine 5 Architecture
+# 9. Unreal Engine 5 Architecture
 
 ## 8.1 Components
 
@@ -253,7 +266,7 @@ void Tick(float DeltaTime)
 
 ---
 
-# 9. Hybrid PCG + Niagara Integration using UNiagaraDataInterface
+# 10. NDI-Based Verse Integration (PCG + Niagara + MetaSounds)
 
 This is where your system becomes visually powerful.
 
@@ -293,7 +306,7 @@ directly into GPU particles.
 
 ---
 
-# 10. Optional Systems (Recommended NOW)
+# 11. Optional Systems (Recommended NOW)
 
 Even though you're early, add these now:
 
@@ -327,7 +340,7 @@ Ensure reproducibility:
 
 ---
 
-# 11. Performance Model
+# 12. Performance Model
 
 ## Target constraints:
 
@@ -340,7 +353,7 @@ Ensure reproducibility:
 
 ---
 
-# 12. What we explicitly REMOVED in v3
+# 13. What we explicitly REMOVED in v3
 
 Because you're now single-player:
 
@@ -355,7 +368,7 @@ These were unnecessary overhead.
 
 ---
 
-# 13. Final System Summary
+# 14. Final System Summary
 
 ```text id="v3_final_01"
 Python = Brain (training + simulation)
@@ -366,7 +379,7 @@ Niagara = GPU visual interpreter
 
 ---
 
-# 14. Key Design Principles (DO NOT BREAK THESE)
+# 15. Key Design Principles (DO NOT BREAK THESE)
 
 ## 1. UE never owns truth
 
@@ -392,7 +405,7 @@ Preallocate everything.
 
 ---
 
-# 15. Recommended Build Order (IMPORTANT)
+# 16. Recommended Build Order (IMPORTANT)
 
 Since you're still in scaffolding stage:
 
