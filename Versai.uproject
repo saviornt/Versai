@@ -1,9 +1,9 @@
 {
 	"FileVersion": 3,
 	"EngineAssociation": "5.7",
-	"DisableEnginePluginsByDefault": true,
 	"Category": "",
 	"Description": "",
+	"DisableEnginePluginsByDefault": true,
 	"Modules": [
 		{
 			"Name": "Versai",
@@ -18,46 +18,34 @@
 		},
 		{
 			"Name": "AssetManagerEditor",
-			"Enabled": true,
-			"Comment": "Provides the UI for managing primary assets and audit tools."
+			"Enabled": true
 		},
 		{
 			"Name": "WebBrowserWidget",
 			"Enabled": true
 		},
 		{
-			"Name": "GitSourceControl",
-			"Enabled": true,
-			"Comment": "Enables the Git provider in the Source Control login dialog."
-		},
-		{
 			"Name": "EditorScriptingUtilities",
-			"Enabled": true,
-			"Comment": "Enables the basic API for editor-side Blueprints and Python."
-		},
-		{
-			"Name": "PythonScriptPlugin",
-			"Enabled": true,
-			"Comment": "Required if you want to use the Epic Developer Assistant to run editor scripts."
-		},
-		{
-			"Name": "PropertyAccessEditor",
-			"Enabled": true,
-			"Comment": "Essential for modern Blueprint property binding and UI logic."
-		},
-		{
-			"Name": "ModelingToolsEditorMode",
-			"Enabled": true,
-			"TargetAllowList": [
-				"Editor"
-			]
-		},
-		{
-			"Name": "PCG",
 			"Enabled": true
 		},
 		{
-			"Name": "GameFeatures",
+			"Name": "PythonScriptPlugin",
+			"Enabled": true
+		},
+		{
+			"Name": "PropertyAccessEditor",
+			"Enabled": true
+		},
+		{
+			"Name": "Niagara",
+			"Enabled": true
+		},
+		{
+			"Name": "Metasound",
+			"Enabled": true
+		},
+		{
+			"Name": "AudioModulation",
 			"Enabled": true
 		},
 		{
@@ -65,49 +53,24 @@
 			"Enabled": true
 		},
 		{
-			"Name": "CommonInput",
-			"Enabled": true,
-			"Comment": "Required by CommonUI to detect input methods (Gamepad vs KBM)."
-		},
-		{
 			"Name": "EnhancedInput",
-			"Enabled": true,
-			"Comment": "Essential for CommonUI 5.x input routing and action mapping."
+			"Enabled": true
 		},
 		{
-			"Name": "Niagara",
-			"Enabled": true,
-			"Comment": "The core Niagara runtime and simulation engine."
+			"Name": "GitSourceControl",
+			"Enabled": true
 		},
 		{
-			"Name": "NiagaraEditor",
-			"Enabled": true,
-			"Comment": "Required to see the Niagara Editor UI and create Niagara Systems."
+			"Name": "ExampleCustomDataInterface",
+			"Enabled": true
 		},
 		{
-			"Name": "NiagaraDataInterfaceSkeletalMesh",
-			"Enabled": true,
-			"Comment": "Allows particles to sample data from skeletal meshes."
+			"Name": "RiderSourceCodeAccess",
+			"Enabled": true
 		},
 		{
-			"Name": "NiagaraDataInterfaceStaticMesh",
-			"Enabled": true,
-			"Comment": "Allows particles to sample data from static meshes."
-		},
-		{
-			"Name": "Metasound",
-			"Enabled": true,
-			"Comment": "The core MetaSound graph and runtime system."
-		},
-		{
-			"Name": "MetasoundEditor",
-			"Enabled": true,
-			"Comment": "Required to open the MetaSound graph editor and edit audio nodes."
-		},
-		{
-			"Name": "AudioModulation",
-			"Enabled": true,
-			"Comment": "Provides the control buses used for sonification and real-time parameter control."
+			"Name": "VisualStudioCodeSourceCodeAccess",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [

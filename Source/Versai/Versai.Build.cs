@@ -6,12 +6,15 @@ public class Versai : ModuleRules
 {
 	public Versai(ReadOnlyTargetRules Target) : base(Target)
 	{
+		// Use the latest UE5 include order convention
+		IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
+		
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
 		PublicDependencyModuleNames.AddRange(new string[] {
 			"Core","CoreUObject", "Engine", "InputCore",
 			"EnhancedInput", "CommonUI", "Niagara", "MetasoundFrontend",
-			"AudioModulation", "CausalLM"
+			"AudioModulation", "VectorVM"
 			});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
