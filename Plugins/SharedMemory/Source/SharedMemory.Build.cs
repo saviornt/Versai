@@ -16,8 +16,11 @@ public class SharedMemory : ModuleRules
 			"Core",
 			"CoreUObject",
 			"Engine",
+			"ApplicationCore",
 			"Niagara",
 			"NiagaraCore",
+			"NiagaraShader",
+			"RenderCore",
 			"VectorVM"
 		});
 

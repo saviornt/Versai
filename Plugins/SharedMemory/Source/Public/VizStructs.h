@@ -1,14 +1,13 @@
 // =============================================================================
 // Versai - SharedMemory Plugin
 // =============================================================================
-
 #pragma once
 
 #include "CoreMinimal.h"
 
 #pragma pack(push, 8)
 
-/** 64-byte aligned frame header (matches Python structured buffer write) */
+/* 64-byte aligned frame header (matches Python structured buffer write) */
 struct alignas(64) FLayerFrameHeader
 {
 	uint64 FrameId;
@@ -21,12 +20,12 @@ struct alignas(64) FLayerFrameHeader
 	uint64 Reserved[2];     // padding to 64 bytes
 };
 
-/** Neuron / PCG point (exact match to NEURON_DTYPE) */
+/** Neuron / PCG point (match to Python float32 layout for direct mapping using NEURON_DTYPE) */
 struct alignas(64) FNeuronPCGPoint
 {
 	int32  Id;
 	float  Activation;
-	FVector Position;       // x, y, z
+	FVector3f Position;       // x, y, z
 	float  Density;
 	float  GradientMag;
 	int32  LayerId;
