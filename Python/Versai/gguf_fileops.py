@@ -1,9 +1,25 @@
 import gguf
 import torch
+import json
 from pathlib import Path
 from typing import Optional, Dict, Any
 
 from Versai.settings import settings
+
+
+def _coerce_gguf_metadata_value(value: Any) -> tuple[Any, gguf.GGUFValueType]:
+    """Convert metadata to GGUF-safe scalar values and matching types."""
+    match value:
+        case bool() as bool_value:
+            return bool_value, gguf.GGUFValueType.BOOL
+        case int() as int_value:
+            return int_value, gguf.GGUFValueType.INT32
+        case float() as float_value:
+            return float_value, gguf.GGUFValueType.FLOAT32
+        case str() as string_value:
+            return string_value, gguf.GGUFValueType.STRING
+        case _:
+            return json.dumps(value, ensure_ascii=True), gguf.GGUFValueType.STRING
 
 
 def _get_branch_folder(model_name: str, branch_name: str) -> Path:
@@ -74,15 +90,8 @@ def save_to_gguf(
             metadata[f"versai.{key}"] = value
 
     for key, value in metadata.items():
-        if isinstance(value, str):
-            vtype = gguf.GGUFValueType.STRING
-        elif isinstance(value, int):
-            vtype = gguf.GGUFValueType.INT32
-        elif isinstance(value, float):
-            vtype = gguf.GGUFValueType.FLOAT32
-        else:
-            vtype = gguf.GGUFValueType.STRING
-        writer.add_key_value(key, value, vtype)
+        coerced_value, value_type = _coerce_gguf_metadata_value(value)
+        writer.add_key_value(key, coerced_value, value_type)
 
     writer.write_header_to_file()
     writer.write_kv_data_to_file()
